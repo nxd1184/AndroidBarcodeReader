@@ -1,4 +1,14 @@
 <resources>
     <string name="app_name">Android Barcode Reader</string>
     <string name="action_settings">Settings</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string name="iview_url">iView Url</string>
+    <string name="save">Save</string>
+    <string name="scan">Scan</string>
+    <string name="bar_code">Bar Code</string>
+    <string name="search_in_iview">Search In iView</string>
+    <string name="scan_result">Scanned: %1$s</string>
 </resources>
