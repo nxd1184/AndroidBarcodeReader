@@ -71,24 +71,28 @@ public class OneFragment extends Fragment {
             @Override
             public void onClick(View v) {
 
-                SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
-                String iViewUrl = sharedPref.getString("iViewUrl", "");
-                if(iViewUrl.isEmpty()){
-                    Toast toast = Toast.makeText(myFragmentView.getContext(), "Please set iView Url in Configuration Tab", Toast.LENGTH_SHORT);
-                    toast.setGravity(Gravity.CENTER_VERTICAL, 0, 0);
-                    toast.show();
-                }else{
+                Intent loginIntent = new Intent(getContext(), LoginActivity.class);
+                loginIntent.putExtra("barcode", barCodeResult);
+                startActivity(loginIntent);
 
-                    if(barCodeResult.equals(NOT_FOUND)){
-                        Toast toast = Toast.makeText(myFragmentView.getContext(), "Barcode Not Found, Please scan barcode first", Toast.LENGTH_SHORT);
-                        toast.setGravity(Gravity.CENTER_VERTICAL, 0, 0);
-                        toast.show();
-                    }else{
-                        Uri uriUrl = Uri.parse(iViewUrl + "?barcode=" + barCodeResult);
-                        Intent launchBrowser = new Intent(Intent.ACTION_VIEW, uriUrl);
-                        startActivity(launchBrowser);
-                    }
-                }
+//                SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+//                String iViewUrl = sharedPref.getString("iViewUrl", "");
+//                if(iViewUrl.isEmpty()){
+//                    Toast toast = Toast.makeText(myFragmentView.getContext(), "Please set iView Url in Configuration Tab", Toast.LENGTH_SHORT);
+//                    toast.setGravity(Gravity.CENTER_VERTICAL, 0, 0);
+//                    toast.show();
+//                }else{
+//
+//                    if(barCodeResult.equals(NOT_FOUND)){
+//                        Toast toast = Toast.makeText(myFragmentView.getContext(), "Barcode Not Found, Please scan barcode first", Toast.LENGTH_SHORT);
+//                        toast.setGravity(Gravity.CENTER_VERTICAL, 0, 0);
+//                        toast.show();
+//                    }else{
+//                        Uri uriUrl = Uri.parse(iViewUrl + "?barcode=" + barCodeResult);
+//                        Intent launchBrowser = new Intent(Intent.ACTION_VIEW, uriUrl);
+//                        startActivity(launchBrowser);
+//                    }
+//                }
             }
         });
 
