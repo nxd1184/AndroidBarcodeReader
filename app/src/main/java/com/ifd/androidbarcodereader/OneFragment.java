@@ -18,6 +18,7 @@ import android.widget.Toast;
 
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
+import com.ifd.androidbarcodereader.service.IviewService;
 
 public class OneFragment extends Fragment {
 
@@ -71,11 +72,29 @@ public class OneFragment extends Fragment {
             @Override
             public void onClick(View v) {
 
-                Intent loginIntent = new Intent(getContext(), LoginActivity.class);
-                loginIntent.putExtra("barcode", barCodeResult);
-                startActivity(loginIntent);
+                SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+                IviewService iviewService = new IviewService();
+                if(!sharedPref.contains("username")){
+                    Intent loginIntent = new Intent(getContext(), LoginActivity.class);
+                    loginIntent.putExtra("barcode", barCodeResult);
+                    startActivity(loginIntent);
+                }else{
+                    String username = sharedPref.getString("username","");
+                    String password = sharedPref.getString("password", "");
+                    if(iviewService.login(username, password)){
+                        Intent listPdfIntent = new Intent(getContext(), ListPdfActivity.class);
+                        listPdfIntent.putExtra("barcode", barCodeResult);
+                        startActivity(listPdfIntent);
+                    }else{
+                        Intent loginIntent = new Intent(getContext(), LoginActivity.class);
+                        loginIntent.putExtra("barcode", barCodeResult);
+                        startActivity(loginIntent);
+                    }
+                }
 
-//                SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+
+
+
 //                String iViewUrl = sharedPref.getString("iViewUrl", "");
 //                if(iViewUrl.isEmpty()){
 //                    Toast toast = Toast.makeText(myFragmentView.getContext(), "Please set iView Url in Configuration Tab", Toast.LENGTH_SHORT);
