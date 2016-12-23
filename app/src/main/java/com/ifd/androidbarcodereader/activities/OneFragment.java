@@ -18,6 +18,7 @@ import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 import com.ifd.androidbarcodereader.R;
 import com.ifd.androidbarcodereader.service.IviewService;
+import com.ifd.androidbarcodereader.utils.Constant;
 
 public class OneFragment extends Fragment {
 
@@ -93,10 +94,14 @@ public class OneFragment extends Fragment {
         mSearchInIviewButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                barCodeResult = "abc";
+//                barCodeResult = "abc";
+                if (Constant.server_url == null || Constant.server_url.equals("")) {
+                    Toast.makeText(getContext(), "Please config server iView url before use this feature", Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 IviewService iviewService = new IviewService();
                 if(barCodeResult == NOT_FOUND) {
-                    Toast.makeText(getContext(), "Please scan bar code before use this feature", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getContext(), "Please scan bar code before use this feature", Toast.LENGTH_SHORT).show();
                     return;
                 }
                 if(!sharedPref.contains(getString(R.string.preference_user_name_key)) || !sharedPref.contains(getString(R.string.preference_password_key))){
