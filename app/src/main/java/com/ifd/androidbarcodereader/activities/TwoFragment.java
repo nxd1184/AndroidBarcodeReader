@@ -1,17 +1,19 @@
-package com.ifd.androidbarcodereader;
+package com.ifd.androidbarcodereader.activities;
 
 
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+
+import com.ifd.androidbarcodereader.R;
+import com.ifd.androidbarcodereader.utils.Constant;
 
 public class TwoFragment extends Fragment {
 
@@ -37,25 +39,29 @@ public class TwoFragment extends Fragment {
         myFragmentView = inflater.inflate(R.layout.fragment_two, container, false);
         mIviewUrl = (EditText) myFragmentView.findViewById(R.id.txtIviewUrl);
         mSave = (Button) myFragmentView.findViewById(R.id.btnSave);
+        final SharedPreferences sharedPref = getActivity().getApplicationContext().getSharedPreferences(
+                getString(R.string.preference_key_app), Context.MODE_PRIVATE);
 
         mSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+                if (mIviewUrl.getText().toString() == null || mIviewUrl.getText().toString().equals("")) {
+                    Toast toast = Toast.makeText(myFragmentView.getContext(), "Please enter iView Url", Toast.LENGTH_SHORT);
+                    toast.show();
+                }
+
+                Constant.server_url = mIviewUrl.getText().toString();
                 SharedPreferences.Editor editor = sharedPref.edit();
-                editor.putString("iViewUrl", mIviewUrl.getText().toString());
-                editor.apply();
+                editor.putString(getString(R.string.preference_server_url_key), Constant.server_url);
+                editor.commit();
 
                 Toast toast = Toast.makeText(myFragmentView.getContext(), "iView Url was saved!", Toast.LENGTH_SHORT);
-                toast.setGravity(Gravity.CENTER_VERTICAL, 0, 0);
                 toast.show();
-
             }
         });
 
-        SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
-        mIviewUrl.setText(sharedPref.getString("iViewUrl", ""));
-
+        Constant.server_url = sharedPref.getString(getString(R.string.preference_server_url_key),Constant.server_url);
+        mIviewUrl.setText(Constant.server_url);
         return myFragmentView;
     }
 }

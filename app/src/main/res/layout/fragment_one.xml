@@ -9,17 +9,33 @@
     android:background="#ffffff"
     android:orientation="vertical"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="com.ifd.androidbarcodereader.OneFragment">
+    tools:context="com.ifd.androidbarcodereader.activities.OneFragment">
 
-    <TextView
-        android:id="@+id/textView1"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center|top"
-        android:layout_margin="20dp"
-        android:text="@string/scan"
-        android:textColor="#000000"
-        android:textSize="30sp" />
+        android:orientation="horizontal">
+        <TextView
+            android:id="@+id/welcome"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left|top"
+            android:layout_margin="10dp"
+            android:text="@string/welcome"
+            android:textColor="#000000"
+            android:textSize="20sp" />
+        <TextView
+            android:id="@+id/logout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left|top"
+            android:layout_marginTop="10dp"
+            android:text="@string/logout"
+            android:textColor="#00ccff"
+            android:visibility="invisible"
+            android:textSize="20sp" />
+    </LinearLayout>
+
 
     <Button
         android:id="@+id/scanner2"
@@ -50,4 +66,10 @@
         android:textSize="18sp"
         android:text="@string/search_in_iview"/>
 
+    <ImageView
+        android:layout_width="170dp"
+        android:layout_height="60dp"
+        android:background="@drawable/ifd_logo"
+        android:layout_marginBottom="0dp"
+        android:layout_gravity="bottom|center" />
 </LinearLayout>

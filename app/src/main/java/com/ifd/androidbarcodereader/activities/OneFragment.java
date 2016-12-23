@@ -1,14 +1,12 @@
-package com.ifd.androidbarcodereader;
+package com.ifd.androidbarcodereader.activities;
 
 
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +16,7 @@ import android.widget.Toast;
 
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
+import com.ifd.androidbarcodereader.R;
 import com.ifd.androidbarcodereader.service.IviewService;
 
 public class OneFragment extends Fragment {
@@ -29,7 +28,7 @@ public class OneFragment extends Fragment {
     private Button mScanner;
     private Button mSearchInIviewButton;
     private Resources res;
-
+    private TextView mLogoutTxt;
     private View myFragmentView;
 
 
@@ -68,19 +67,45 @@ public class OneFragment extends Fragment {
         });
 
         mSearchInIviewButton = (Button) myFragmentView.findViewById(R.id.searchInIviewButton);
+        mLogoutTxt = (TextView) myFragmentView.findViewById(R.id.logout);
+        final SharedPreferences sharedPref = getActivity().getApplicationContext().getSharedPreferences(
+                getString(R.string.preference_key_app), Context.MODE_PRIVATE);
+        if(sharedPref.contains(getString(R.string.preference_user_name_key)) && sharedPref.contains(getString(R.string.preference_password_key))){
+            TextView welcome = (TextView) myFragmentView.findViewById(R.id.welcome);
+            welcome.setText("Welcome, " + sharedPref.getString(getString(R.string.preference_user_name_key),""));
+            mLogoutTxt.setVisibility(View.VISIBLE);
+        }
+
+        mLogoutTxt.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                SharedPreferences.Editor editor = sharedPref.edit();
+                editor.remove(getString(R.string.preference_user_name_key));
+                editor.remove(getString(R.string.preference_password_key));
+                editor.commit();
+                TextView welcome = (TextView) myFragmentView.findViewById(R.id.welcome);
+                welcome.setText("Welcome, GUEST");
+                mLogoutTxt.setVisibility(View.INVISIBLE);
+            }
+        });
+
+
         mSearchInIviewButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+                barCodeResult = "abc";
                 IviewService iviewService = new IviewService();
-                if(!sharedPref.contains("username")){
+                if(barCodeResult == NOT_FOUND) {
+                    Toast.makeText(getContext(), "Please scan bar code before use this feature", Toast.LENGTH_LONG).show();
+                    return;
+                }
+                if(!sharedPref.contains(getString(R.string.preference_user_name_key)) || !sharedPref.contains(getString(R.string.preference_password_key))){
                     Intent loginIntent = new Intent(getContext(), LoginActivity.class);
                     loginIntent.putExtra("barcode", barCodeResult);
                     startActivity(loginIntent);
                 }else{
-                    String username = sharedPref.getString("username","");
-                    String password = sharedPref.getString("password", "");
+                    String username = sharedPref.getString(getString(R.string.preference_user_name_key),"");
+                    String password = sharedPref.getString(getString(R.string.preference_password_key), "");
                     if(iviewService.login(username, password)){
                         Intent listPdfIntent = new Intent(getContext(), ListPdfActivity.class);
                         listPdfIntent.putExtra("barcode", barCodeResult);
