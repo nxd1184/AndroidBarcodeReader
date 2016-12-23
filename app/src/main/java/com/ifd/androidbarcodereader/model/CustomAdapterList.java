@@ -1,6 +1,7 @@
 package com.ifd.androidbarcodereader.model;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -15,6 +16,7 @@ import android.widget.Toast;
 
 import com.ifd.androidbarcodereader.R;
 import com.ifd.androidbarcodereader.activities.ListPdfActivity;
+import com.ifd.androidbarcodereader.activities.SignPdfActivity;
 
 import java.util.List;
 
@@ -80,7 +82,7 @@ public class CustomAdapterList extends BaseAdapter {
 //        }
         holder.tv.setText(list_document.get(position).getFileName());
         holder.tv2.setTypeface(holder.tv2.getTypeface(), Typeface.BOLD);
-        holder.tv2.setText("Archive Name: " + list_document.get(position).getArchiveName());
+        holder.tv2.setText("Archive: " + list_document.get(position).getArchiveName());
 
 //        holder.tv.setText(String.format("%02d",position + 1) + ". " + list_document.get(position).getFileName());
 //        int img_id = context.getResources().getIdentifier(list_document.get(position).getImage_file(), "drawable", context.getPackageName());
@@ -88,9 +90,9 @@ public class CustomAdapterList extends BaseAdapter {
         rowView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                Intent intent = new Intent(context, SignPdfActivity.class);
-//                intent.putExtra("", list_position.get(position));
-//                context.startActivity(intent);
+                Intent intent = new Intent(context, SignPdfActivity.class);
+                //intent.putExtra("", list_position.get(position));
+                context.startActivity(intent);
                 Toast.makeText(context, "Clicked on " + list_document.get(position).getFileName(), Toast.LENGTH_LONG).show();
 
             }
