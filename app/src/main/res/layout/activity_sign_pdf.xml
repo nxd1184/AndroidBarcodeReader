@@ -30,12 +30,7 @@
 		android:layout_height="50dp"
 		android:layout_gravity="center"
 		android:orientation="horizontal" >
-		<ImageButton
-			android:id="@+id/previous_btn"
-			android:layout_width="wrap_content"
-			android:layout_height="fill_parent"
-			android:contentDescription="@string/brush"
-			android:src="@drawable/previous_btn" />
+
 		<ImageButton
 			android:id="@+id/select_btn"
 			android:layout_width="wrap_content"
@@ -70,12 +65,6 @@
 			android:layout_height="fill_parent"
 			android:contentDescription="@string/save"
 			android:src="@drawable/save" />
-		<ImageButton
-			android:id="@+id/next_btn"
-			android:layout_width="wrap_content"
-			android:layout_height="fill_parent"
-			android:contentDescription="@string/brush"
-			android:src="@drawable/next_btn" />
 	</LinearLayout>
 
 	<!-- Custom View -->
@@ -169,12 +158,13 @@
 		<!--</LinearLayout>-->
 
 		<!-- Bottom Row -->
-		<TextView
-			android:id="@+id/txtPage"
+		<ImageButton
+			android:id="@+id/previous_btn"
 			android:layout_width="wrap_content"
-			android:layout_height="@dimen/large_brush"
-			android:layout_gravity="left"
-			android:text="Page: 1/1"/>
+			android:layout_height="fill_parent"
+			android:contentDescription="@string/brush"
+			android:background="@null"
+			android:src="@drawable/previous_btn" />
 		<LinearLayout
 			android:id="@+id/paint_colors"
 			android:layout_width="wrap_content"
@@ -241,6 +231,21 @@
 				android:src="@drawable/paint"
 				android:tag="#FF000000" />
 		</LinearLayout>
+		<ImageButton
+			android:id="@+id/next_btn"
+			android:layout_width="wrap_content"
+			android:layout_height="fill_parent"
+			android:background="@null"
+			android:contentDescription="@string/brush"
+			android:src="@drawable/next_btn" />
+
+		<TextView
+			android:id="@+id/txtPage"
+			android:layout_marginLeft="10dp"
+			android:layout_width="wrap_content"
+			android:layout_height="@dimen/large_brush"
+			android:layout_gravity="right"
+			android:text="Page: 1/1"/>
 	</LinearLayout>
 
 </LinearLayout>

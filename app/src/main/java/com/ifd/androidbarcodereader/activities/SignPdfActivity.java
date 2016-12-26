@@ -12,11 +12,15 @@ import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.text.SpannableString;
+import android.text.style.UnderlineSpan;
 import android.util.DisplayMetrics;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.animation.AlphaAnimation;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -63,7 +67,9 @@ public class SignPdfActivity extends Activity implements OnClickListener {
 	int totalPage = 1;
 	private String archiveName;
 	private String fileName;
-
+	String userName;
+	String password;
+	TextView txtPage;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -110,6 +116,10 @@ public class SignPdfActivity extends Activity implements OnClickListener {
 		nextBtn.setOnClickListener(this);
 		preBtn = (ImageButton)findViewById(R.id.previous_btn);
 		preBtn.setOnClickListener(this);
+
+		txtPage = (TextView) findViewById(R.id.txtPage);
+		txtPage.setOnClickListener(this);
+
 		showProgress(true);
 
 
@@ -134,8 +144,8 @@ public class SignPdfActivity extends Activity implements OnClickListener {
 
 		SharedPreferences sharedPref = getApplicationContext().getSharedPreferences(
 				getString(R.string.preference_key_app), Context.MODE_PRIVATE);
-		String userName = sharedPref.getString(getString(R.string.preference_user_name_key), null);
-		String password = sharedPref.getString(getString(R.string.preference_password_key), null);
+		userName = sharedPref.getString(getString(R.string.preference_user_name_key), null);
+		password = sharedPref.getString(getString(R.string.preference_password_key), null);
 		if (userName == null || password == null) {
 			showHomeScreen();
 			Toast.makeText(getApplicationContext(), "Please login before use this feature", Toast.LENGTH_LONG).show();
@@ -162,26 +172,19 @@ public class SignPdfActivity extends Activity implements OnClickListener {
 		Intent mainIntent = new Intent(getBaseContext(), MainActivity.class);
 		startActivity(mainIntent);
 	}
-	private void showNextPage()
+	private void showPageNum(int numPage)
 	{
-		if (currentPage < totalPage)
-			currentPage++;
 		showProgress(true);
-		GetPdfDocumentTask task = new GetPdfDocumentTask("anguyen", "anguyen", "GRABBERANH", "ISIGN-KALA0286-161028-ANGUYEN-494336-ANGUYEN-000079.PDF", currentPage, false, this);
+		GetPdfDocumentTask task = new GetPdfDocumentTask(userName, password, archiveName, fileName, numPage, false, this);
 		task.execute((Void) null);
 	}
-	private void showPrePage()
-	{
-		if (currentPage > 0)
-			currentPage--;
-		showProgress(true);
-		GetPdfDocumentTask task = new GetPdfDocumentTask("anguyen", "anguyen", "GRABBERANH", "ISIGN-KALA0286-161028-ANGUYEN-494336-ANGUYEN-000079.PDF", currentPage, false, this);
-		task.execute((Void) null);
-	}
+
 	private void updatePageNumber()
 	{
-		TextView txtPage = (TextView)findViewById(R.id.txtPage);
-		txtPage.setText("Page " + currentPage + "/" + totalPage);
+		String pageStr =new String("Page " + currentPage + "/" + totalPage);
+		SpannableString content = new SpannableString(pageStr);
+		content.setSpan(new UnderlineSpan(), 0, pageStr.length(), 0);
+		txtPage.setText(content);
 	}
 	public void showPdfDocument(JSONObject jsonObject)
 	{
@@ -401,7 +404,7 @@ public class SignPdfActivity extends Activity implements OnClickListener {
 					FileOutputStream out = null;
 					try {
 						File sd = Environment.getExternalStorageDirectory();
-						File dest = new File(sd, filename);
+						File dest = new File(sd.getAbsoluteFile(), filename);
 
 						out = new FileOutputStream(dest);
 						saveBitMap.compress(Bitmap.CompressFormat.PNG, 100, out); // bmp is your Bitmap instance
@@ -452,10 +455,36 @@ public class SignPdfActivity extends Activity implements OnClickListener {
 			saveDialog.show();
 		}
 		else if (view.getId()==R.id.next_btn){
-			showNextPage();
+			if (currentPage < totalPage)
+				currentPage++;
+			showPageNum(currentPage);
 		}
 		else if (view.getId()==R.id.previous_btn){
-			showPrePage();
+			if (currentPage > 0)
+				currentPage--;
+			showPageNum(currentPage);
+		}
+		else if (view.getId() == R.id.txtPage) {
+			//draw button clicked
+			final Dialog pageDialog = new Dialog(this);
+			pageDialog.setTitle("Go To Page:");
+			pageDialog.setContentView(R.layout.page_chooser);
+			final EditText txtNumPage = (EditText) pageDialog.findViewById(R.id.txtNumPage);
+			txtNumPage.setHint(currentPage + "");
+			Button OK_bnt = (Button) pageDialog.findViewById(R.id.OK_btn);
+			OK_bnt.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View view) {
+					if (!txtNumPage.getText().toString().equals("")) {
+						int numPage = Integer.parseInt(txtNumPage.getText().toString());
+						currentPage = numPage;
+						showPageNum(numPage);
+					}
+					pageDialog.dismiss();
+				}
+			});
+			//show and wait for user interaction
+			pageDialog.show();
 		}
 	}
 	private static Bitmap eraseBG(Bitmap src, int color) {
