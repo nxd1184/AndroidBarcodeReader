@@ -3,32 +3,39 @@ package com.ifd.androidbarcodereader.service;
 import android.os.AsyncTask;
 import android.widget.Toast;
 
-import com.ifd.androidbarcodereader.activities.ListPdfActivity;
+import com.ifd.androidbarcodereader.activities.SignPdfActivity;
 
 import org.json.JSONObject;
 
 import java.util.Map;
 
 /**
- * Created by LenVo on 12/21/16.
+ * Created by LenVo on 12/26/16.
  */
 
-public class SearchDocumentTask extends AsyncTask<Void, Void, Map<String, Object>> {
+public class GetPdfDocumentTask  extends AsyncTask<Void, Void, Map<String, Object>> {
     private final String mUsername;
     private final String mPassword;
-    private final String mBarcode;
-    private ListPdfActivity activity;
+    private final String mArchive;
+    private final String mFileName;
+    private final int mPage;
+    private final boolean mGetNumOfPage;
 
-    public SearchDocumentTask(String username, String password, String mBarcode, ListPdfActivity activity) {
+    private SignPdfActivity activity;
+
+    public GetPdfDocumentTask(String username, String password, String mArchive, String mFileName, int mPage, boolean mGetNumOfPage ,SignPdfActivity activity) {
         this.mUsername = username;
         this.mPassword = password;
-        this.mBarcode = mBarcode;
+        this.mArchive = mArchive;
+        this.mFileName = mFileName;
+        this.mGetNumOfPage = mGetNumOfPage;
+        this.mPage = mPage;
         this.activity = activity;
     }
     @Override
     protected Map<String, Object> doInBackground(Void... params) {
         IviewService service = new IviewService();
-        Map<String, Object> result = service.search(mUsername, mPassword, mBarcode);
+        Map<String, Object> result = service.getPdfDocument(mUsername, mPassword, mArchive, mFileName, mPage, mGetNumOfPage);
         return result;
     }
 
@@ -39,7 +46,7 @@ public class SearchDocumentTask extends AsyncTask<Void, Void, Map<String, Object
             Toast.makeText(this.activity.getApplicationContext(), "Can't get document from server. Please contact Administrator. Error code: " + mapResult.get("status_code"), Toast.LENGTH_LONG).show();
             return;
         }
-        activity.updateListDocument((JSONObject) mapResult.get("result"));
+        activity.showPdfDocument((JSONObject) mapResult.get("result"));
     }
 
     @Override

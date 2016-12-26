@@ -1,21 +1,38 @@
 package com.ifd.androidbarcodereader.activities;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.os.Build;
 import android.os.Bundle;
-import android.provider.MediaStore;
+import android.os.Environment;
+import android.util.DisplayMetrics;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.animation.AlphaAnimation;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ifd.androidbarcodereader.R;
 import com.ifd.androidbarcodereader.model.DrawingView;
+import com.ifd.androidbarcodereader.service.GetPdfDocumentTask;
+import com.ifd.androidbarcodereader.utils.Constant;
 
+import org.json.JSONObject;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.UUID;
 
 /**
@@ -31,14 +48,30 @@ public class SignPdfActivity extends Activity implements OnClickListener {
 	//custom drawing view
 	private DrawingView drawView;
 	//buttons
-	private ImageButton currPaint, drawBtn, eraseBtn, newBtn, saveBtn;
+	private ImageButton currPaint, drawBtn, eraseBtn, newBtn, saveBtn, nextBtn, preBtn;
 	//sizes
 	private float smallBrush, mediumBrush, largeBrush;
+
+	private View mProgressView;
+
+	AlphaAnimation inAnimation;
+	AlphaAnimation outAnimation;
+
+	FrameLayout progressBarHolder;
+
+	int currentPage = 1;
+	int totalPage = 1;
+	private String archiveName;
+	private String fileName;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_sign_pdf);
+		DisplayMetrics displaymetrics = new DisplayMetrics();
+		getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
+		Constant.width_device = displaymetrics.widthPixels;
+		Constant.height_device = displaymetrics.heightPixels;
 
 		//get drawing view
 		drawView = (DrawingView)findViewById(R.id.drawing);
@@ -71,6 +104,154 @@ public class SignPdfActivity extends Activity implements OnClickListener {
 		//save button
 		saveBtn = (ImageButton)findViewById(R.id.save_btn);
 		saveBtn.setOnClickListener(this);
+		progressBarHolder = (FrameLayout) findViewById(R.id.progressBarHolder);
+
+		nextBtn = (ImageButton)findViewById(R.id.next_btn);
+		nextBtn.setOnClickListener(this);
+		preBtn = (ImageButton)findViewById(R.id.previous_btn);
+		preBtn.setOnClickListener(this);
+		showProgress(true);
+
+
+		Bundle extra = getIntent().getExtras();
+		if (extra == null) {
+			Toast.makeText(getApplicationContext(), "Internal error, please try again", Toast.LENGTH_LONG).show();
+			showHomeScreen();
+			return;
+		}
+		archiveName = (String) extra.get("archiveName");
+		if (archiveName == null || archiveName.equals("")) {
+			Toast.makeText(getApplicationContext(), "Please choose PDF file before use this feature", Toast.LENGTH_LONG).show();
+			showListPDF();
+			return;
+		}
+		fileName = (String) extra.get("fileName");
+		if (fileName == null || fileName.equals("")) {
+			Toast.makeText(getApplicationContext(), "Please choose PDF file before use this feature", Toast.LENGTH_LONG).show();
+			showListPDF();
+			return;
+		}
+
+		SharedPreferences sharedPref = getApplicationContext().getSharedPreferences(
+				getString(R.string.preference_key_app), Context.MODE_PRIVATE);
+		String userName = sharedPref.getString(getString(R.string.preference_user_name_key), null);
+		String password = sharedPref.getString(getString(R.string.preference_password_key), null);
+		if (userName == null || password == null) {
+			showHomeScreen();
+			Toast.makeText(getApplicationContext(), "Please login before use this feature", Toast.LENGTH_LONG).show();
+			return;
+		}
+
+		GetPdfDocumentTask task = new GetPdfDocumentTask(userName, password, archiveName, fileName, 1, true, this);
+		task.execute((Void) null);
+
+//		IviewService service = new IviewService();
+//		Map<String, Object> mapResult = service.getPdfDocument("anguyen", "anguyen", "GRABBERANH", "ISIGN-KALA0286-161028-ANGUYEN-494336-ANGUYEN-000079.PDF", 1, true);
+//		if (!mapResult.containsKey("result")) {
+//			Toast.makeText(getApplicationContext(), "Can't get PDF document from server. Please try again. Internal error!", Toast.LENGTH_SHORT).show();
+//			return;
+//		}
+//		JSONObject jsonObject = (JSONObject) mapResult.get("result");
+
+
+	}
+	private void showListPDF() {
+		this.finish();
+	}
+	private void showHomeScreen() {
+		Intent mainIntent = new Intent(getBaseContext(), MainActivity.class);
+		startActivity(mainIntent);
+	}
+	private void showNextPage()
+	{
+		if (currentPage < totalPage)
+			currentPage++;
+		showProgress(true);
+		GetPdfDocumentTask task = new GetPdfDocumentTask("anguyen", "anguyen", "GRABBERANH", "ISIGN-KALA0286-161028-ANGUYEN-494336-ANGUYEN-000079.PDF", currentPage, false, this);
+		task.execute((Void) null);
+	}
+	private void showPrePage()
+	{
+		if (currentPage > 0)
+			currentPage--;
+		showProgress(true);
+		GetPdfDocumentTask task = new GetPdfDocumentTask("anguyen", "anguyen", "GRABBERANH", "ISIGN-KALA0286-161028-ANGUYEN-494336-ANGUYEN-000079.PDF", currentPage, false, this);
+		task.execute((Void) null);
+	}
+	private void updatePageNumber()
+	{
+		TextView txtPage = (TextView)findViewById(R.id.txtPage);
+		txtPage.setText("Page " + currentPage + "/" + totalPage);
+	}
+	public void showPdfDocument(JSONObject jsonObject)
+	{
+		if (jsonObject == null || !jsonObject.has("code")) {
+			return;
+		}
+		try {
+			if (!jsonObject.has("code")) {
+				Toast.makeText(getApplicationContext(), "Can't get PDF document from server. Please try again.", Toast.LENGTH_SHORT).show();
+				return;
+			}
+			try {
+				if(jsonObject.has("numberOfPages"))
+					totalPage = Integer.parseInt(jsonObject.getString("numberOfPages"));
+
+				if (jsonObject.getString("code").equals("0")) {
+					Toast.makeText(getApplicationContext(), "Please login to use this feature.", Toast.LENGTH_SHORT).show();
+					showHomeScreen();
+					return;
+				}
+				String base64 = jsonObject.getString("image");
+				drawView.showPDFContent(base64);
+				drawView.setErase(false);
+				drawView.setBrushSize(smallBrush);
+				drawView.setLastBrushSize(smallBrush);
+				updatePageNumber();
+			}catch (Exception e)
+			{
+				e.printStackTrace();
+			}
+			showProgress(false);
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	@TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
+	private void showProgress(final boolean show) {
+		// On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
+		// for very easy animations. If available, use these APIs to fade-in
+		// the progress spinner.
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
+			int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
+
+//			mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+//			mProgressView.animate().setDuration(shortAnimTime).alpha(
+//					show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
+//				@Override
+//				public void onAnimationEnd(Animator animation) {
+//					mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+//				}
+//			});
+
+			if(show) {
+				inAnimation = new AlphaAnimation(0f, 1f);
+				inAnimation.setDuration(200);
+				progressBarHolder.setAnimation(inAnimation);
+				progressBarHolder.setVisibility(View.VISIBLE);
+			}
+			else {
+				outAnimation = new AlphaAnimation(1f, 0f);
+				outAnimation.setDuration(200);
+				progressBarHolder.setAnimation(outAnimation);
+				progressBarHolder.setVisibility(View.GONE);
+			}
+
+		} else {
+			// The ViewPropertyAnimator APIs are not available, so simply show
+			// and hide the relevant UI components.
+			progressBarHolder.setVisibility(show ? View.VISIBLE : View.GONE);
+		}
 	}
 
 	@Override
@@ -204,20 +385,62 @@ public class SignPdfActivity extends Activity implements OnClickListener {
 					//save drawing
 					drawView.setDrawingCacheEnabled(true);
 					//attempt to save
-					String imgSaved = MediaStore.Images.Media.insertImage(
-							getContentResolver(), drawView.getDrawingCache(),
-							UUID.randomUUID().toString()+".png", "drawing");
-					//feedback
-					if(imgSaved!=null){
-						Toast savedToast = Toast.makeText(getApplicationContext(), 
+//					String imgSaved = MediaStore.Images.Media.insertImage(
+//							getContentResolver(), drawView.getDrawingCache(),
+//							UUID.randomUUID().toString()+".png", "drawing");
+//					String imgSaved = MediaStore.Images.Media.insertImage(
+//							getContentResolver(), drawView.getCanvasBitmap(),
+//							UUID.randomUUID().toString()+".png", "drawing");
+					Bitmap saveBitMap = eraseBG(drawView.getTransparentBitmap(), -1);         // use for white background
+//					saveBitMap = eraseBG(saveBitMap, -16777216);  // use for black background
+//					String imgSaved = MediaStore.Images.Media.insertImage(
+//							getContentResolver(), saveBitMap,
+//							UUID.randomUUID().toString()+".png", "drawing");
+
+					String filename = UUID.randomUUID().toString()+".png";
+					FileOutputStream out = null;
+					try {
+						File sd = Environment.getExternalStorageDirectory();
+						File dest = new File(sd, filename);
+
+						out = new FileOutputStream(dest);
+						saveBitMap.compress(Bitmap.CompressFormat.PNG, 100, out); // bmp is your Bitmap instance
+						// PNG is a lossless format, the compression factor (100) is ignored
+
+//						Save with backgroud image
+//						File dest2 = new File(sd, UUID.randomUUID().toString()+".png");
+//						FileOutputStream out2 = new FileOutputStream(dest2);
+//						drawView.getCanvasBitmap().compress(Bitmap.CompressFormat.PNG, 100, out2); // bmp is your Bitmap instance
+
+						Toast savedToast = Toast.makeText(getApplicationContext(),
 								"Drawing saved to Gallery!", Toast.LENGTH_SHORT);
 						savedToast.show();
-					}
-					else{
-						Toast unsavedToast = Toast.makeText(getApplicationContext(), 
+					} catch (Exception e) {
+						e.printStackTrace();
+						Toast unsavedToast = Toast.makeText(getApplicationContext(),
 								"Oops! Image could not be saved.", Toast.LENGTH_SHORT);
 						unsavedToast.show();
+					} finally {
+						try {
+							if (out != null) {
+								out.close();
+							}
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
 					}
+
+					//feedback
+//					if(imgSaved!=null){
+//						Toast savedToast = Toast.makeText(getApplicationContext(),
+//								"Drawing saved to Gallery!", Toast.LENGTH_SHORT);
+//						savedToast.show();
+//					}
+//					else{
+//						Toast unsavedToast = Toast.makeText(getApplicationContext(),
+//								"Oops! Image could not be saved.", Toast.LENGTH_SHORT);
+//						unsavedToast.show();
+//					}
 					drawView.destroyDrawingCache();
 				}
 			});
@@ -228,6 +451,32 @@ public class SignPdfActivity extends Activity implements OnClickListener {
 			});
 			saveDialog.show();
 		}
+		else if (view.getId()==R.id.next_btn){
+			showNextPage();
+		}
+		else if (view.getId()==R.id.previous_btn){
+			showPrePage();
+		}
 	}
+	private static Bitmap eraseBG(Bitmap src, int color) {
+		int width = src.getWidth();
+		int height = src.getHeight();
+		Bitmap b = src.copy(Bitmap.Config.ARGB_8888, true);
+		b.setHasAlpha(true);
+
+		int[] pixels = new int[width * height];
+		src.getPixels(pixels, 0, width, 0, 0, width, height);
+
+		for (int i = 0; i < width * height; i++) {
+			if (pixels[i] == color) {
+				pixels[i] = 0;
+			}
+		}
+
+		b.setPixels(pixels, 0, width, 0, 0, width, height);
+
+		return b;
+	}
+
 
 }
