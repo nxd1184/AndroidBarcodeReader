@@ -477,8 +477,10 @@ public class SignPdfActivity extends Activity implements OnClickListener {
 				public void onClick(View view) {
 					if (!txtNumPage.getText().toString().equals("")) {
 						int numPage = Integer.parseInt(txtNumPage.getText().toString());
-						currentPage = numPage;
-						showPageNum(numPage);
+						if(numPage <= totalPage && numPage > 0) {
+							currentPage = numPage;
+							showPageNum(numPage);
+						}
 					}
 					pageDialog.dismiss();
 				}
