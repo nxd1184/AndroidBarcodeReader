@@ -91,7 +91,8 @@ public class CustomAdapterList extends BaseAdapter {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(context, SignPdfActivity.class);
-                //intent.putExtra("", list_position.get(position));
+                intent.putExtra("archiveName", list_document.get(position).getArchiveName());
+                intent.putExtra("fileName", list_document.get(position).getFileName() + ".PDF");
                 context.startActivity(intent);
                 Toast.makeText(context, "Clicked on " + list_document.get(position).getFileName(), Toast.LENGTH_LONG).show();
 

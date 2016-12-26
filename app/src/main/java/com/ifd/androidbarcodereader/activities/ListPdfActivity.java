@@ -79,32 +79,6 @@ public class ListPdfActivity extends AppCompatActivity {
         SearchDocumentTask task = new SearchDocumentTask(userName, password, barcode, this);
         task.execute((Void) null);
 
-//
-//
-//
-//        if(typePosition == TypeOfPosition.SEX_KNOWLEDGE) {
-//            list_position.setAdapter(new CustomAdapterList(this, DatabaseHelper.list_sex_knowledge));
-//            title_knowledge.setBackgroundResource(R.drawable.sex_knowledge);
-//        }
-//        else {
-//            list_position.setAdapter(new CustomAdapterList(this, DatabaseHelper.getListSexPositionByType(typePosition)));
-//            title_knowledge.setBackgroundResource(R.drawable.list_position_title);
-//        }
-
-//        menu_home.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                showHomeScreen();
-//            }
-//        });
-//
-//        menu_share.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                shareApp();
-//            }
-//        });
-
     }
     public void updateListDocument(JSONObject jsonObject) {
         if (jsonObject == null || !jsonObject.has("documents")) {
