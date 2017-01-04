@@ -28,7 +28,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ifd.androidbarcodereader.R;
-import com.ifd.androidbarcodereader.model.DrawingView;
+import com.ifd.androidbarcodereader.model.DrawingViewInPDF;
 import com.ifd.androidbarcodereader.service.GetPdfDocumentTask;
 import com.ifd.androidbarcodereader.utils.Constant;
 
@@ -50,7 +50,7 @@ import java.util.UUID;
 public class SignPdfActivity extends Activity implements OnClickListener {
 
 	//custom drawing view
-	private DrawingView drawView;
+	private DrawingViewInPDF drawView;
 	//buttons
 	private ImageButton currPaint, drawBtn, eraseBtn, newBtn, saveBtn, nextBtn, preBtn;
 	//sizes
@@ -80,7 +80,7 @@ public class SignPdfActivity extends Activity implements OnClickListener {
 		Constant.height_device = displaymetrics.heightPixels;
 
 		//get drawing view
-		drawView = (DrawingView)findViewById(R.id.drawing);
+		drawView = (DrawingViewInPDF)findViewById(R.id.drawing);
 
 		//get the palette and first color button
 		LinearLayout paintLayout = (LinearLayout)findViewById(R.id.paint_colors);

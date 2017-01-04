@@ -29,7 +29,7 @@ import com.ifd.androidbarcodereader.utils.Constant;
  * August 2013
  *
  */
-public class DrawingView extends View {
+public class DrawingViewInPDF extends View {
 
 	//drawing path
 	private Path drawPath;
@@ -58,7 +58,7 @@ public class DrawingView extends View {
 
 	private final String TAG = "DrawingView";
 
-	public DrawingView(Context context, AttributeSet attrs){
+	public DrawingViewInPDF(Context context, AttributeSet attrs){
 		super(context, attrs);
 		setupDrawing();
 	}
