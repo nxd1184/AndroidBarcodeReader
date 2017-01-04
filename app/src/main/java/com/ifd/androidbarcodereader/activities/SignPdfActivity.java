@@ -29,7 +29,6 @@ import android.widget.Toast;
 
 import com.ifd.androidbarcodereader.R;
 import com.ifd.androidbarcodereader.model.DrawingViewInPDF;
-import com.ifd.androidbarcodereader.service.GetPdfDocumentTask;
 import com.ifd.androidbarcodereader.utils.Constant;
 
 import org.json.JSONObject;
@@ -152,16 +151,10 @@ public class SignPdfActivity extends Activity implements OnClickListener {
 			return;
 		}
 
-		GetPdfDocumentTask task = new GetPdfDocumentTask(userName, password, archiveName, fileName, 1, true, this);
-		task.execute((Void) null);
+		//TODO: It is old way to drawing. need to open bellow code to get the PDF file from server.
+//		GetPdfDocumentTask task = new GetPdfDocumentTask(userName, password, archiveName, fileName, 1, true, this);
+//		task.execute((Void) null);
 
-//		IviewService service = new IviewService();
-//		Map<String, Object> mapResult = service.getPdfDocument("anguyen", "anguyen", "GRABBERANH", "ISIGN-KALA0286-161028-ANGUYEN-494336-ANGUYEN-000079.PDF", 1, true);
-//		if (!mapResult.containsKey("result")) {
-//			Toast.makeText(getApplicationContext(), "Can't get PDF document from server. Please try again. Internal error!", Toast.LENGTH_SHORT).show();
-//			return;
-//		}
-//		JSONObject jsonObject = (JSONObject) mapResult.get("result");
 
 
 	}
@@ -175,8 +168,9 @@ public class SignPdfActivity extends Activity implements OnClickListener {
 	private void showPageNum(int numPage)
 	{
 		showProgress(true);
-		GetPdfDocumentTask task = new GetPdfDocumentTask(userName, password, archiveName, fileName, numPage, false, this);
-		task.execute((Void) null);
+		//TODO: It is old way to drawing. need to open bellow code to get the PDF file from server.
+//		GetPdfDocumentTask task = new GetPdfDocumentTask(userName, password, archiveName, fileName, numPage, false, this);
+//		task.execute((Void) null);
 	}
 
 	private void updatePageNumber()

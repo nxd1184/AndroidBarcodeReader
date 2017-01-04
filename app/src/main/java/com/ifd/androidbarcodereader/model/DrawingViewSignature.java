@@ -31,7 +31,7 @@ public class DrawingViewSignature extends View {
 	//drawing and canvas paint
 	private Paint drawPaint, canvasPaint;
 	//initial color
-	private int paintColor = 0xFF660000;
+	private int paintColor = 0xFF000000;
 	//canvas
 	private Canvas drawCanvas;
 	//canvas bitmap
@@ -50,7 +50,7 @@ public class DrawingViewSignature extends View {
 	private void setupDrawing(){
 
 		//prepare for drawing and setup paint stroke properties
-		brushSize = getResources().getInteger(R.integer.medium_size);
+		brushSize = getResources().getInteger(R.integer.small_size);
 		lastBrushSize = brushSize;
 		drawPath = new Path();
 		drawPaint = new Paint();
@@ -63,12 +63,17 @@ public class DrawingViewSignature extends View {
 		canvasPaint = new Paint(Paint.DITHER_FLAG);
 	}
 
+	public Bitmap getCanvasBitmap() {
+		return canvasBitmap;
+	}
 	//size assigned to view
 	@Override
 	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
 		super.onSizeChanged(w, h, oldw, oldh);
 		canvasBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+		canvasBitmap.eraseColor(Color.WHITE);
 		drawCanvas = new Canvas(canvasBitmap);
+
 	}
 
 	//draw the view - will be called after touch event
