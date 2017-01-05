@@ -15,6 +15,7 @@ import android.view.MotionEvent;
 import android.view.View;
 
 import com.ifd.androidbarcodereader.R;
+import com.ifd.androidbarcodereader.utils.Constant;
 
 /**
  * This is demo code to accompany the Mobiletuts+ tutorial series:
@@ -61,6 +62,12 @@ public class DrawingViewSignature extends View {
 		drawPaint.setStrokeJoin(Paint.Join.ROUND);
 		drawPaint.setStrokeCap(Paint.Cap.ROUND);
 		canvasPaint = new Paint(Paint.DITHER_FLAG);
+
+		int width = Constant.width_device;
+		int height = Constant.height_device;
+		canvasBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+		canvasBitmap.eraseColor(Color.WHITE);
+		drawCanvas = new Canvas(canvasBitmap);
 	}
 
 	public Bitmap getCanvasBitmap() {
@@ -70,9 +77,9 @@ public class DrawingViewSignature extends View {
 	@Override
 	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
 		super.onSizeChanged(w, h, oldw, oldh);
-		canvasBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
-		canvasBitmap.eraseColor(Color.WHITE);
-		drawCanvas = new Canvas(canvasBitmap);
+		if (canvasBitmap == null && w > 0 && h > 0)
+			canvasBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+
 
 	}
 

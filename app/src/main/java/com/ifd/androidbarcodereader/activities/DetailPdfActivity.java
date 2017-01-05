@@ -60,6 +60,7 @@ public class DetailPdfActivity extends Activity implements View.OnClickListener 
     String userName;
     String password;
     TextView txtPage;
+    private String base64;
 
     DetailPdfActivity applicationContext;
 
@@ -113,8 +114,6 @@ public class DetailPdfActivity extends Activity implements View.OnClickListener 
         txtPage = (TextView) findViewById(R.id.txtPage);
         txtPage.setOnClickListener(this);
 
-        showProgress(true);
-
 
         Bundle extra = getIntent().getExtras();
         if (extra == null) {
@@ -144,7 +143,16 @@ public class DetailPdfActivity extends Activity implements View.OnClickListener 
             Toast.makeText(getApplicationContext(), "Please login before use this feature", Toast.LENGTH_LONG).show();
             return;
         }
+        base64 = (String) extra.get("base64");
+        if (base64 != null) {
+            currentPage = (int) extra.get("pageNum");
+            totalPage = (int) extra.get("totalPage");
+            updatePDFWithBase64(base64);
+            updatePageNumber();
+            return;
+        }
 
+        showProgress(true);
         GetPdfDocumentTask task = new GetPdfDocumentTask(userName, password, archiveName, fileName, 1, true, this);
         task.execute((Void) null);
 
@@ -168,19 +176,23 @@ public class DetailPdfActivity extends Activity implements View.OnClickListener 
     private void showPageNum(int numPage)
     {
         showProgress(true);
-        GetPdfDocumentTask task = new GetPdfDocumentTask(userName, password, archiveName, fileName, 1, true, this);
+        GetPdfDocumentTask task = new GetPdfDocumentTask(userName, password, archiveName, fileName, numPage, true, this);
         task.execute((Void) null);
     }
 
-    private void updatePageNumber()
-    {
+    private void updatePageNumber() {
         String pageStr =new String("Page " + currentPage + "/" + totalPage);
         SpannableString content = new SpannableString(pageStr);
         content.setSpan(new UnderlineSpan(), 0, pageStr.length(), 0);
         txtPage.setText(content);
     }
-    public void showPdfDocument(JSONObject jsonObject)
-    {
+    private void updatePDFWithBase64(String base64) {
+        drawView.showPDFContent(base64);
+        drawView.setErase(false);
+        drawView.setBrushSize(smallBrush);
+        drawView.setLastBrushSize(smallBrush);
+    }
+    public void showPdfDocument(JSONObject jsonObject) {
         if (jsonObject == null || !jsonObject.has("code")) {
             return;
         }
@@ -199,10 +211,7 @@ public class DetailPdfActivity extends Activity implements View.OnClickListener 
                     return;
                 }
                 String base64 = jsonObject.getString("image");
-                drawView.showPDFContent(base64);
-                drawView.setErase(false);
-                drawView.setBrushSize(smallBrush);
-                drawView.setLastBrushSize(smallBrush);
+                updatePDFWithBase64(base64);
                 updatePageNumber();
             }catch (Exception e)
             {
@@ -297,7 +306,7 @@ public class DetailPdfActivity extends Activity implements View.OnClickListener 
             intent.putExtra("archiveName", archiveName);
             intent.putExtra("fileName", fileName);
             intent.putExtra("pageNum", currentPage);
-
+            intent.putExtra("totalPage", totalPage);
             applicationContext.startActivity(intent);
 
         }
@@ -456,6 +465,8 @@ public class DetailPdfActivity extends Activity implements View.OnClickListener 
                         if(numPage <= totalPage && numPage > 0) {
                             currentPage = numPage;
                             showPageNum(numPage);
+                        } else {
+                          Toast.makeText(getApplicationContext(), "Please enter the page from [1," + totalPage + "]", Toast.LENGTH_SHORT).show();
                         }
                     }
                     pageDialog.dismiss();

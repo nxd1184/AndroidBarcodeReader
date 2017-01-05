@@ -8,7 +8,10 @@ import com.ifd.androidbarcodereader.utils.Constant;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
@@ -121,6 +124,65 @@ public class IviewService {
 
             responseCode = conn.getResponseCode();
             System.out.println("\nSending 'GET' request to URL : " + url);
+            System.out.println("Response Code : " + responseCode);
+
+            BufferedReader in =
+                    new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            String inputLine;
+            StringBuffer response = new StringBuffer();
+
+            while ((inputLine = in.readLine()) != null) {
+                response.append(inputLine);
+            }
+            in.close();
+            result.put("result", new JSONObject(response.toString()));
+            Log.i("DEBUG_", result.toString());
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        result.put("status_code", responseCode);
+        return result;
+    }
+    public Map<String, Object> savePdfDocument(String username, String password, String archiveName, String fileName, int page, String base64, int left, int top, int width, int height){
+        Map<String, Object> result = new HashMap<>();
+        int responseCode = -1;
+        try {
+            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+            StrictMode.setThreadPolicy(policy);
+            String url = "http://"  + Constant.server_url + "/api/v1/save-signature";
+            URL obj = new URL(url);
+            HttpURLConnection conn = (HttpURLConnection) obj.openConnection();
+            // act like a browser
+            conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Macintosh; U; PPC; en-US; rv:1.3.1)");
+            conn.setRequestProperty("Accept-Charset", "UTF-8");
+            conn.setRequestProperty("Accept",
+                    "text/html,application/xhtml+xml,application/xml,application/json;q=0.9,*/*;q=0.8");
+            conn.setRequestProperty("Content-Type", "application/json");
+            conn.setConnectTimeout(15000);
+            conn.setRequestMethod("POST");
+            conn.setDoInput(true);
+            conn.setDoOutput(true);
+            conn.setUseCaches(false);
+
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("username", username);
+            jsonObject.put("password", password);
+            jsonObject.put("archive", archiveName);
+            jsonObject.put("fileName", fileName);
+            jsonObject.put("page", page);
+            jsonObject.put("left", left);
+            jsonObject.put("top", top);
+            jsonObject.put("width", width);
+            jsonObject.put("height", height);
+            jsonObject.put("base64", base64);
+
+            OutputStream os = conn.getOutputStream();
+            BufferedWriter writer = new BufferedWriter(
+                    new OutputStreamWriter(os, "UTF-8"));
+            writer.write(jsonObject.toString());
+            writer.flush();
+            responseCode = conn.getResponseCode();
+            System.out.println("\nSending 'POST' request to URL : " + url + "  query: " + jsonObject.toString());
             System.out.println("Response Code : " + responseCode);
 
             BufferedReader in =

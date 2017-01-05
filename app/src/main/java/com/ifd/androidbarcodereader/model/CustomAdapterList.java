@@ -12,7 +12,6 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.ifd.androidbarcodereader.R;
 import com.ifd.androidbarcodereader.activities.DetailPdfActivity;
@@ -108,7 +107,7 @@ public class CustomAdapterList extends BaseAdapter {
                 intent.putExtra("archiveName", list_document.get(position).getArchiveName());
                 intent.putExtra("fileName", list_document.get(position).getFileName() + ".PDF");
                 context.startActivity(intent);
-                Toast.makeText(context, "Clicked on " + list_document.get(position).getFileName(), Toast.LENGTH_LONG).show();
+//                Toast.makeText(context, "Clicked on " + list_document.get(position).getFileName(), Toast.LENGTH_LONG).show();
 
             }
         });

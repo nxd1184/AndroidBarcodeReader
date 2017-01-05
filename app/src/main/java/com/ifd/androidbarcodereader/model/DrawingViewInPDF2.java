@@ -17,7 +17,6 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Toast;
 
 import com.ifd.androidbarcodereader.R;
 import com.ifd.androidbarcodereader.utils.Constant;
@@ -216,7 +215,7 @@ public class DrawingViewInPDF2 extends View {
 //			drawCanvas.drawRect(startX, startY, endX, endY, drawPaint);
 			drawPath.addRect(startX, startY, endX, endY, Path.Direction.CCW);
 			drawCanvas.drawPath(drawPath, drawPaint);
-			Toast.makeText(getContext(), "Defined box: Left: " + getLeftRec() + " -Top: " + getTopRec() + " -Width: " + getWidthRec() + " -Height: " + getHeightRec(), Toast.LENGTH_SHORT).show();
+//			Toast.makeText(getContext(), "Defined box: Left: " + getLeftRec() + " -Top: " + getTopRec() + " -Width: " + getWidthRec() + " -Height: " + getHeightRec(), Toast.LENGTH_SHORT).show();
 //			drawPath.lineTo(touchX, touchY);
 //			drawScalePath.lineTo(touchX, touchY);
 //			drawCanvas.drawPath(drawScalePath, drawPaint);
