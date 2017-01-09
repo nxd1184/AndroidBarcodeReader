@@ -3,7 +3,7 @@ package com.ifd.androidbarcodereader.service;
 import android.os.AsyncTask;
 import android.widget.Toast;
 
-import com.ifd.androidbarcodereader.activities.SignPdfActivity;
+import com.ifd.androidbarcodereader.activities.DetailPdfActivity;
 
 import org.json.JSONObject;
 
@@ -21,9 +21,10 @@ public class GetPdfDocumentTask  extends AsyncTask<Void, Void, Map<String, Objec
     private final int mPage;
     private final boolean mGetNumOfPage;
 
-    private SignPdfActivity activity;
-
-    public GetPdfDocumentTask(String username, String password, String mArchive, String mFileName, int mPage, boolean mGetNumOfPage ,SignPdfActivity activity) {
+    //TODO: It is old way to drawing. need to open bellow code to get the PDF file from server.
+//    private SignPdfActivity activity;
+    private DetailPdfActivity activity;
+    public GetPdfDocumentTask(String username, String password, String mArchive, String mFileName, int mPage, boolean mGetNumOfPage ,DetailPdfActivity activity) {
         this.mUsername = username;
         this.mPassword = password;
         this.mArchive = mArchive;

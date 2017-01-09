@@ -69,7 +69,7 @@
 
 	<!-- Custom View -->
 
-	<com.ifd.androidbarcodereader.model.DrawingView
+	<com.ifd.androidbarcodereader.model.DrawingViewInPDF
 		android:id="@+id/drawing"
 		android:layout_width="fill_parent"
 		android:layout_height="0dp"

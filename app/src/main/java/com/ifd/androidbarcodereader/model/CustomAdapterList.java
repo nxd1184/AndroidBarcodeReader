@@ -12,11 +12,10 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.ifd.androidbarcodereader.R;
+import com.ifd.androidbarcodereader.activities.DetailPdfActivity;
 import com.ifd.androidbarcodereader.activities.ListPdfActivity;
-import com.ifd.androidbarcodereader.activities.SignPdfActivity;
 
 import java.util.List;
 
@@ -87,17 +86,32 @@ public class CustomAdapterList extends BaseAdapter {
 //        holder.tv.setText(String.format("%02d",position + 1) + ". " + list_document.get(position).getFileName());
 //        int img_id = context.getResources().getIdentifier(list_document.get(position).getImage_file(), "drawable", context.getPackageName());
 //        holder.img.setImageBitmap(decodeSampledBitmapFromResource(context.getResources(), R.drawable.ic_launcher, 1440, 2560));
+
+        //TODO: It is old way to drawing. need to open bellow code to get the PDF file from server.
+//        rowView.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                Intent intent = new Intent(context, SignPdfActivity.class);
+//                intent.putExtra("archiveName", list_document.get(position).getArchiveName());
+//                intent.putExtra("fileName", list_document.get(position).getFileName() + ".PDF");
+//                context.startActivity(intent);
+//                Toast.makeText(context, "Clicked on " + list_document.get(position).getFileName(), Toast.LENGTH_LONG).show();
+//
+//            }
+//        });
+
         rowView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(context, SignPdfActivity.class);
+                Intent intent = new Intent(context, DetailPdfActivity.class);
                 intent.putExtra("archiveName", list_document.get(position).getArchiveName());
                 intent.putExtra("fileName", list_document.get(position).getFileName() + ".PDF");
                 context.startActivity(intent);
-                Toast.makeText(context, "Clicked on " + list_document.get(position).getFileName(), Toast.LENGTH_LONG).show();
+//                Toast.makeText(context, "Clicked on " + list_document.get(position).getFileName(), Toast.LENGTH_LONG).show();
 
             }
         });
+
         return rowView;
     }
     public static Bitmap decodeSampledBitmapFromResource(Resources res, int resId,

@@ -29,13 +29,10 @@ import com.ifd.androidbarcodereader.utils.Constant;
  * August 2013
  *
  */
-public class DrawingView extends View {
+public class DrawingViewInPDF2 extends View {
 
 	//drawing path
 	private Path drawPath;
-
-	//drawing path
-	private Path drawScalePath;
 
 	//drawing and canvas paint
 	private Paint drawPaint, canvasPaint;
@@ -51,18 +48,28 @@ public class DrawingView extends View {
 	private boolean erase=false;
 	private Bitmap tempCanvasBitmap;
 	private Bitmap transparentBitmap;
-	//canvas
-	private Canvas drawTransparentCanvas;
-	private float minZoom;
-	private float maxZoom;
+
+
+	private float startX, startY, endX, endY;
 
 	private final String TAG = "DrawingView";
 
-	public DrawingView(Context context, AttributeSet attrs){
+	public DrawingViewInPDF2(Context context, AttributeSet attrs){
 		super(context, attrs);
 		setupDrawing();
 	}
-
+	public int getLeftRec() {
+		return (int)(Math.min(startX, endX));
+	}
+	public int getTopRec() {
+		return (int)(Math.min(startY, endY));
+	}
+	public int getWidthRec() {
+		return (int)(Math.abs(startX - endX));
+	}
+	public int getHeightRec() {
+		return (int)(Math.abs(startY - endY));
+	}
 	public Bitmap getCanvasBitmap() {
 		return canvasBitmap;
 	}
@@ -84,7 +91,6 @@ public class DrawingView extends View {
 		brushSize = getResources().getInteger(R.integer.small_size) *scale_x;
 		lastBrushSize = brushSize;
 		drawPath = new Path();
-		drawScalePath = new Path();
 		drawPaint = new Paint();
 		drawPaint.setColor(paintColor);
 		drawPaint.setAntiAlias(true);
@@ -102,11 +108,10 @@ public class DrawingView extends View {
 //		options.inSampleSize = 2;
 		tempCanvasBitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length, options);
 		canvasBitmap = tempCanvasBitmap.copy(Bitmap.Config.ARGB_8888, true);
-		transparentBitmap = Bitmap.createBitmap(tempCanvasBitmap.getWidth(), tempCanvasBitmap.getHeight(), Bitmap.Config.ARGB_8888);
-		transparentBitmap.eraseColor(Color.WHITE);
+//		transparentBitmap = Bitmap.createBitmap(tempCanvasBitmap.getWidth(), tempCanvasBitmap.getHeight(), Bitmap.Config.ARGB_8888);
+//		transparentBitmap.eraseColor(Color.WHITE);
 //		transparentBitmap.eraseColor(Color.TRANSPARENT);
 		drawCanvas = new Canvas(canvasBitmap);
-		drawTransparentCanvas = new Canvas(transparentBitmap);
 
 		int width = Constant.width_device;
 		int height = Constant.height_device;
@@ -181,26 +186,42 @@ public class DrawingView extends View {
 		if (drawCanvas == null)
 			return true;
 		float touchX = event.getX()*scale_x;
-		float touchY = event.getY()*scale_y;
+		touchX = (touchX < 0)? 0: touchX;
+		touchX = (touchX > canvasBitmap.getWidth())? canvasBitmap.getWidth(): touchX;
+
+		float touchY = Math.abs(event.getY()*scale_y);
+		touchY = (touchY < 0)? 0: touchY;
+		touchY = (touchY > canvasBitmap.getHeight())? canvasBitmap.getHeight(): touchY;
+
 		Log.i(TAG, "On Touch Event, event.getAction()=" + event.getAction() + " -event.getX()=" + event.getX() + " event.getY()=" + event.getY() + " -touchX: " + touchX + " -touchY: "+ touchY );
 		//respond to down, move and up events
 		switch (event.getAction()) {
 		case MotionEvent.ACTION_DOWN:
-			drawPath.moveTo(event.getX(), event.getY());
-			drawScalePath.moveTo(touchX, touchY);
+			startX = touchX;
+			startY = touchY;
+			canvasBitmap = tempCanvasBitmap.copy(Bitmap.Config.ARGB_8888, true);
+			drawCanvas = new Canvas(canvasBitmap);
+//			drawPath.moveTo(event.getX(), event.getY());
+//			drawScalePath.moveTo(touchX, touchY);
 			break;
 		case MotionEvent.ACTION_MOVE:
-			drawPath.lineTo(event.getX(), event.getY());
-			drawScalePath.lineTo(touchX, touchY);
+//			drawPath.lineTo(event.getX(), event.getY());
+//			drawScalePath.lineTo(touchX, touchY);
 
 			break;
 		case MotionEvent.ACTION_UP:
+			endX = touchX;
+			endY = touchY;
+//			drawCanvas.drawRect(startX, startY, endX, endY, drawPaint);
+			drawPath.addRect(startX, startY, endX, endY, Path.Direction.CCW);
+			drawCanvas.drawPath(drawPath, drawPaint);
+//			Toast.makeText(getContext(), "Defined box: Left: " + getLeftRec() + " -Top: " + getTopRec() + " -Width: " + getWidthRec() + " -Height: " + getHeightRec(), Toast.LENGTH_SHORT).show();
 //			drawPath.lineTo(touchX, touchY);
-			drawScalePath.lineTo(touchX, touchY);
-			drawCanvas.drawPath(drawScalePath, drawPaint);
-			drawTransparentCanvas.drawPath(drawScalePath, drawPaint);
+//			drawScalePath.lineTo(touchX, touchY);
+//			drawCanvas.drawPath(drawScalePath, drawPaint);
+//			drawTransparentCanvas.drawPath(drawScalePath, drawPaint);
 			drawPath.reset();
-			drawScalePath.reset();
+//			drawScalePath.reset();
 			break;
 		default:
 			return false;
@@ -255,8 +276,8 @@ public class DrawingView extends View {
 		canvasBitmap = tempCanvasBitmap.copy(Bitmap.Config.ARGB_8888, true);
 		drawCanvas = new Canvas(canvasBitmap);
 
-		transparentBitmap = Bitmap.createBitmap(tempCanvasBitmap.getWidth(), tempCanvasBitmap.getHeight(), Bitmap.Config.ARGB_8888);
-		drawTransparentCanvas = new Canvas(transparentBitmap);
+//		transparentBitmap = Bitmap.createBitmap(tempCanvasBitmap.getWidth(), tempCanvasBitmap.getHeight(), Bitmap.Config.ARGB_8888);
+//		drawTransparentCanvas = new Canvas(transparentBitmap);
 //		drawCanvas.drawColor(0, PorterDuff.Mode.CLEAR);
 		invalidate();
 	}
