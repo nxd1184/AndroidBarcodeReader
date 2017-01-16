@@ -26,13 +26,15 @@ import java.util.List;
 public class CustomAdapterList extends BaseAdapter {
     private Context context;
     private List<PdfDocument> list_document;
+    private String barcode;
     private static LayoutInflater inflater=null;
-    public CustomAdapterList(ListPdfActivity mainActivity, List<PdfDocument> list_document) {
+    public CustomAdapterList(ListPdfActivity mainActivity, List<PdfDocument> list_document, String barcode) {
         // TODO Auto-generated constructor stub
         this.list_document = list_document;
         context=mainActivity;
         inflater = (LayoutInflater)context.
                 getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        this.barcode = barcode;
     }
     @Override
     public int getCount() {
@@ -106,6 +108,7 @@ public class CustomAdapterList extends BaseAdapter {
                 Intent intent = new Intent(context, DetailPdfActivity.class);
                 intent.putExtra("archiveName", list_document.get(position).getArchiveName());
                 intent.putExtra("fileName", list_document.get(position).getFileName() + ".PDF");
+                intent.putExtra("barcode", barcode);
                 context.startActivity(intent);
 //                Toast.makeText(context, "Clicked on " + list_document.get(position).getFileName(), Toast.LENGTH_LONG).show();
 
