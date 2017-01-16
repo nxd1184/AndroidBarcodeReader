@@ -122,23 +122,24 @@ public class DrawingViewInPDF2 extends View {
 //		transparentBitmap.eraseColor(Color.TRANSPARENT);
 		drawCanvas = new Canvas(canvasBitmap);
 		this.definedBox = definedBox;
-		if (definedBox != null) {
-			startX = this.definedBox.getLeft();
-			startY = this.definedBox.getTop();
-			endX = this.definedBox.getLeft() + this.definedBox.getWidth();
-			endY = this.definedBox.getTop() + this.definedBox.getHeight();
-
-			drawPath.addRect(getLeftRec(), getTopRec(), getLeftRec() + getWidth(), getTopRec() + getHeightRec(), Path.Direction.CCW);
-			drawCanvas.drawPath(drawPath, drawPaint);
-			drawPath.reset();
-		}
 //		this.drawBox = definedBox.clone();
 		int width = Constant.width_device;
 		int height = Constant.height_device;
 		scale_x = ((float)canvasBitmap.getWidth())/width;
 		scale_y = ((float)canvasBitmap.getHeight())/height;
-		brushSize = getResources().getInteger(R.integer.small_size) *scale_x;
+		brushSize = getResources().getInteger(R.integer.small_size) ;
 		lastBrushSize = brushSize;
+		if (definedBox != null) {
+			startX = this.definedBox.getLeft()/scale_x;
+			startY = this.definedBox.getTop()/scale_y;
+			endX = (this.definedBox.getLeft() + this.definedBox.getWidth())/scale_x;
+			endY = (this.definedBox.getTop() + this.definedBox.getHeight())/scale_y;
+
+			drawPath.addRect(getLeftRec(), getTopRec(), getLeftRec() + getWidthRec(), getTopRec() + getHeightRec(), Path.Direction.CCW);
+			drawCanvas.drawPath(drawPath, drawPaint);
+			drawPath.reset();
+			drawBox = definedBox.clone();
+		}
 		invalidate();
 	}
 
@@ -233,7 +234,7 @@ public class DrawingViewInPDF2 extends View {
 			endX = touchX;
 			endY = touchY;
 //			drawCanvas.drawRect(startX, startY, endX, endY, drawPaint);
-			drawBox = new DefineBoxIview(getLeftRec(), getTopRec(), getWidth(), getHeightRec(), paintColor, (int)brushSize);
+			drawBox = new DefineBoxIview(getLeftRec(), getTopRec(), getWidthRec(), getHeightRec(), paintColor, (int)brushSize);
 			drawPath.addRect(startX, startY, endX, endY, Path.Direction.CCW);
 			drawCanvas.drawPath(drawPath, drawPaint);
 //			Toast.makeText(getContext(), "Defined box: Left: " + getLeftRec() + " -Top: " + getTopRec() + " -Width: " + getWidthRec() + " -Height: " + getHeightRec(), Toast.LENGTH_SHORT).show();
