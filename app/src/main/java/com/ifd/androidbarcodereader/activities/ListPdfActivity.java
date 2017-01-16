@@ -91,7 +91,7 @@ public class ListPdfActivity extends AppCompatActivity {
                 JSONObject documentJson = documents.getJSONObject(i);
                 PdfDocument document = new PdfDocument(documentJson);
                 list_document.add(document);
-                listview_document.setAdapter(new CustomAdapterList(this, list_document));
+                listview_document.setAdapter(new CustomAdapterList(this, list_document, barcode));
             }
             showProgress(false);
         }catch (Exception e) {
@@ -104,8 +104,12 @@ public class ListPdfActivity extends AppCompatActivity {
         startActivity(mainIntent);
     }
     @Override
+    public void onBackPressed() {
+        showHomeScreen();
+    }
+    @Override
     public boolean onKeyDown(int keyCode, KeyEvent event)  {
-        if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
             showHomeScreen();
             return true;
         }

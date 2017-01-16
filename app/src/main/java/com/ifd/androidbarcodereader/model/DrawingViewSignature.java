@@ -123,6 +123,12 @@ public class DrawingViewSignature extends View {
 		paintColor = Color.parseColor(newColor);
 		drawPaint.setColor(paintColor);
 	}
+	//update color
+	public void setColor(int newColor){
+		invalidate();
+		paintColor = newColor;
+		drawPaint.setColor(paintColor);
+	}
 
 	//set brush size
 	public void setBrushSize(float newSize){

@@ -324,11 +324,13 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             IviewService service = new IviewService();
             boolean result = service.login(mUsername, mPassword);
             if(result == true){
+                String role = service.getAuthentication(mUsername, mPassword);
                 SharedPreferences sharedPref = getApplicationContext().getSharedPreferences(
                         getString(R.string.preference_key_app), Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = sharedPref.edit();
                 editor.putString(getString(R.string.preference_user_name_key), mUsername);
                 editor.putString(getString(R.string.preference_password_key), mPassword);
+                editor.putString(getString(R.string.preference_user_role_key), role);
                 editor.commit();
             }
 

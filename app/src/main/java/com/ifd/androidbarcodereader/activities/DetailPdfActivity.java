@@ -11,10 +11,10 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.text.SpannableString;
 import android.text.style.UnderlineSpan;
 import android.util.DisplayMetrics;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
@@ -22,27 +22,27 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ifd.androidbarcodereader.R;
+import com.ifd.androidbarcodereader.model.DefineBoxIview;
 import com.ifd.androidbarcodereader.model.DrawingViewInPDF2;
 import com.ifd.androidbarcodereader.service.GetPdfDocumentTask;
+import com.ifd.androidbarcodereader.service.SaveSignatureLocationTask;
 import com.ifd.androidbarcodereader.utils.Constant;
 
 import org.json.JSONObject;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.UUID;
+import java.util.Map;
 
 public class DetailPdfActivity extends Activity implements View.OnClickListener {
 
     //custom drawing view
     private DrawingViewInPDF2 drawView;
     //buttons
-    private ImageButton currPaint, drawBtn, eraseBtn, newBtn, saveBtn, nextBtn, preBtn;
+    private ImageButton currPaint, drawBtn, eraseBtn, newBtn, saveBtn, nextBtn, preBtn, cropBtn;
     //sizes
     private float smallBrush, mediumBrush, largeBrush;
 
@@ -59,11 +59,13 @@ public class DetailPdfActivity extends Activity implements View.OnClickListener 
     private String fileName;
     String userName;
     String password;
+    String role;
     TextView txtPage;
     private String base64;
+    private String barcode;
 
     DetailPdfActivity applicationContext;
-
+    LinearLayout paintLayout;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -77,9 +79,9 @@ public class DetailPdfActivity extends Activity implements View.OnClickListener 
         drawView = (DrawingViewInPDF2)findViewById(R.id.drawing);
 
         //get the palette and first color button
-//        LinearLayout paintLayout = (LinearLayout)findViewById(R.id.paint_colors);
-//        currPaint = (ImageButton)paintLayout.getChildAt(0);
-//        currPaint.setImageDrawable(getResources().getDrawable(R.drawable.paint_pressed));
+        paintLayout = (LinearLayout)findViewById(R.id.paint_colors);
+        currPaint = (ImageButton)paintLayout.getChildAt(0);
+        currPaint.setImageDrawable(getResources().getDrawable(R.drawable.paint_pressed));
 
         //sizes from dimensions
         smallBrush = getResources().getInteger(R.integer.small_size);
@@ -114,6 +116,10 @@ public class DetailPdfActivity extends Activity implements View.OnClickListener 
         txtPage = (TextView) findViewById(R.id.txtPage);
         txtPage.setOnClickListener(this);
 
+        cropBtn = (ImageButton)findViewById(R.id.crop_btn);
+        cropBtn.setOnClickListener(this);
+        saveBtn = (ImageButton)findViewById(R.id.save_btn1);
+        saveBtn.setOnClickListener(this);
 
         Bundle extra = getIntent().getExtras();
         if (extra == null) {
@@ -138,16 +144,20 @@ public class DetailPdfActivity extends Activity implements View.OnClickListener 
                 getString(R.string.preference_key_app), Context.MODE_PRIVATE);
         userName = sharedPref.getString(getString(R.string.preference_user_name_key), null);
         password = sharedPref.getString(getString(R.string.preference_password_key), null);
+        role = sharedPref.getString(getString(R.string.preference_user_role_key), "USER");
         if (userName == null || password == null) {
             showHomeScreen();
             Toast.makeText(getApplicationContext(), "Please login before use this feature", Toast.LENGTH_LONG).show();
             return;
         }
+        barcode = (String) extra.get("barcode");
+
         base64 = (String) extra.get("base64");
         if (base64 != null) {
             currentPage = (int) extra.get("pageNum");
             totalPage = (int) extra.get("totalPage");
-            updatePDFWithBase64(base64);
+            DefineBoxIview definedBox = (DefineBoxIview) extra.get("definedBox");
+            updatePDFWithBase64(base64, definedBox);
             updatePageNumber();
             return;
         }
@@ -165,9 +175,12 @@ public class DetailPdfActivity extends Activity implements View.OnClickListener 
 //		JSONObject jsonObject = (JSONObject) mapResult.get("result");
 
 
+
     }
     private void showListPDF() {
-        this.finish();
+        Intent listPdfIntent = new Intent(getApplicationContext(), ListPdfActivity.class);
+        listPdfIntent.putExtra("barcode", barcode);
+        startActivity(listPdfIntent);
     }
     private void showHomeScreen() {
         Intent mainIntent = new Intent(getBaseContext(), MainActivity.class);
@@ -186,11 +199,19 @@ public class DetailPdfActivity extends Activity implements View.OnClickListener 
         content.setSpan(new UnderlineSpan(), 0, pageStr.length(), 0);
         txtPage.setText(content);
     }
-    private void updatePDFWithBase64(String base64) {
-        drawView.showPDFContent(base64);
+    private void updatePDFWithBase64(String base64, DefineBoxIview definedBox) {
         drawView.setErase(false);
         drawView.setBrushSize(smallBrush);
         drawView.setLastBrushSize(smallBrush);
+        drawView.setColor(definedBox.getPaintColor());
+        drawView.showPDFContent(base64, definedBox);
+        if(definedBox != null)
+        {
+            if (role.equals("USER")){
+                cropBtn.setVisibility(View.GONE);
+            }
+        }
+
     }
     public void showPdfDocument(JSONObject jsonObject) {
         if (jsonObject == null || !jsonObject.has("code")) {
@@ -200,6 +221,10 @@ public class DetailPdfActivity extends Activity implements View.OnClickListener 
             if (!jsonObject.has("code")) {
                 Toast.makeText(getApplicationContext(), "Can't get PDF document from server. Please try again.", Toast.LENGTH_SHORT).show();
                 return;
+            }
+            DefineBoxIview definedBox = null;
+            if (jsonObject.has("signature_location")) {
+                definedBox = new DefineBoxIview(jsonObject.getJSONObject("signature_location"));
             }
             try {
                 if(jsonObject.has("numberOfPages"))
@@ -211,7 +236,7 @@ public class DetailPdfActivity extends Activity implements View.OnClickListener 
                     return;
                 }
                 String base64 = jsonObject.getString("image");
-                updatePDFWithBase64(base64);
+                updatePDFWithBase64(base64, definedBox);
                 updatePageNumber();
             }catch (Exception e)
             {
@@ -285,30 +310,41 @@ public class DetailPdfActivity extends Activity implements View.OnClickListener 
         }
     }
 
+    private boolean draw_definebox = false;
 
     @Override
     public void onClick(View view){
 
         if(view.getId()==R.id.draw_btn){
             //TODO: Get left, top, width, height of the rectangle
-            if(drawView.getLeftRec() == 0 && drawView.getTopRec() == 0)
+            DefineBoxIview definedBox = drawView.getDefinedBox();
+            if(definedBox == null)
             {
                 Toast.makeText(getApplicationContext(), "Please define the box before signing", Toast.LENGTH_SHORT).show();
                 return;
             }
 
             Intent intent = new Intent(getApplicationContext(), SignBlankActivity.class);
-            intent.putExtra("Left", drawView.getLeftRec());
-            intent.putExtra("Top", drawView.getTopRec());
-            intent.putExtra("Width", drawView.getWidthRec());
-            intent.putExtra("Height", drawView.getHeightRec());
+            intent.putExtra("definedBox", definedBox);
 
             intent.putExtra("archiveName", archiveName);
             intent.putExtra("fileName", fileName);
             intent.putExtra("pageNum", currentPage);
             intent.putExtra("totalPage", totalPage);
+            intent.putExtra("barcode", barcode);
             applicationContext.startActivity(intent);
 
+        }
+        else if(view.getId()==R.id.crop_btn){
+            draw_definebox = !draw_definebox;
+            if(draw_definebox) {
+                paintLayout.setVisibility(View.VISIBLE);
+            }
+            else {
+                paintLayout.setVisibility(View.GONE);
+                drawView.startNew();
+            }
+            drawView.setFlagDefineBox(draw_definebox);
         }
 //		else if(view.getId()==R.id.erase_btn){
 //			//switch to erase - choose size
@@ -363,73 +399,24 @@ public class DetailPdfActivity extends Activity implements View.OnClickListener 
             });
             newDialog.show();
         }
-        else if(view.getId()==R.id.save_btn){
+        else if(view.getId()==R.id.save_btn1){
             //save drawing
             AlertDialog.Builder saveDialog = new AlertDialog.Builder(this);
             saveDialog.setTitle("Save drawing");
-            saveDialog.setMessage("Save drawing to device Gallery?");
+            saveDialog.setMessage("Save Signature Location?");
             saveDialog.setPositiveButton("Yes", new DialogInterface.OnClickListener(){
                 public void onClick(DialogInterface dialog, int which){
-                    //save drawing
-                    drawView.setDrawingCacheEnabled(true);
-                    //attempt to save
-//					String imgSaved = MediaStore.Images.Media.insertImage(
-//							getContentResolver(), drawView.getDrawingCache(),
-//							UUID.randomUUID().toString()+".png", "drawing");
-//					String imgSaved = MediaStore.Images.Media.insertImage(
-//							getContentResolver(), drawView.getCanvasBitmap(),
-//							UUID.randomUUID().toString()+".png", "drawing");
-                    Bitmap saveBitMap = eraseBG(drawView.getTransparentBitmap(), -1);         // use for white background
-//					saveBitMap = eraseBG(saveBitMap, -16777216);  // use for black background
-//					String imgSaved = MediaStore.Images.Media.insertImage(
-//							getContentResolver(), saveBitMap,
-//							UUID.randomUUID().toString()+".png", "drawing");
+                //TODO: Get drawbox -> save it into the server -> reload the view
+                DefineBoxIview drawbox = drawView.getDrawBox();
+                if(drawbox == null )
+                {
+                    Toast.makeText(getApplicationContext(), "Please define the box before save signature location", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                showProgress(true);
+                SaveSignatureLocationTask task = new SaveSignatureLocationTask(applicationContext, userName, password, archiveName, drawbox.getLeft(), drawbox.getTop(), drawbox.getWidth(), drawbox.getHeight(), drawView.getPaintColor());
+                task.execute((Void) null);
 
-                    String filename = UUID.randomUUID().toString()+".png";
-                    FileOutputStream out = null;
-                    try {
-                        File sd = Environment.getExternalStorageDirectory();
-                        File dest = new File(sd.getAbsoluteFile(), filename);
-
-                        out = new FileOutputStream(dest);
-                        saveBitMap.compress(Bitmap.CompressFormat.PNG, 100, out); // bmp is your Bitmap instance
-                        // PNG is a lossless format, the compression factor (100) is ignored
-
-//						Save with backgroud image
-//						File dest2 = new File(sd, UUID.randomUUID().toString()+".png");
-//						FileOutputStream out2 = new FileOutputStream(dest2);
-//						drawView.getCanvasBitmap().compress(Bitmap.CompressFormat.PNG, 100, out2); // bmp is your Bitmap instance
-
-                        Toast savedToast = Toast.makeText(getApplicationContext(),
-                                "Drawing saved to Gallery!", Toast.LENGTH_SHORT);
-                        savedToast.show();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        Toast unsavedToast = Toast.makeText(getApplicationContext(),
-                                "Oops! Image could not be saved.", Toast.LENGTH_SHORT);
-                        unsavedToast.show();
-                    } finally {
-                        try {
-                            if (out != null) {
-                                out.close();
-                            }
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-
-                    //feedback
-//					if(imgSaved!=null){
-//						Toast savedToast = Toast.makeText(getApplicationContext(),
-//								"Drawing saved to Gallery!", Toast.LENGTH_SHORT);
-//						savedToast.show();
-//					}
-//					else{
-//						Toast unsavedToast = Toast.makeText(getApplicationContext(),
-//								"Oops! Image could not be saved.", Toast.LENGTH_SHORT);
-//						unsavedToast.show();
-//					}
-                    drawView.destroyDrawingCache();
                 }
             });
             saveDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener(){
@@ -494,6 +481,35 @@ public class DetailPdfActivity extends Activity implements View.OnClickListener 
         b.setPixels(pixels, 0, width, 0, 0, width, height);
 
         return b;
+    }
+    @Override
+    public void onBackPressed() {
+        showListPDF();
+    }
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event)  {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            showListPDF();
+            return true;
+        }
+
+        return super.onKeyDown(keyCode, event);
+    }
+    public void saveSignatureLocationComplete(Map<String, Object> mapResult)
+    {
+        paintLayout.setVisibility(View.GONE);
+        draw_definebox = false;
+        drawView.setFlagDefineBox(draw_definebox);
+        if (!mapResult.containsKey("result")) {
+            Toast.makeText(getApplicationContext(), "Can't save signature location, please try again. Error code: " + mapResult.get("status_code"), Toast.LENGTH_LONG).show();
+            showProgress(false);
+        } else {
+            Toast.makeText(getApplicationContext(),
+                    "Signature Location saved successfull! ", Toast.LENGTH_SHORT).show();
+            GetPdfDocumentTask task = new GetPdfDocumentTask(userName, password, archiveName, fileName, currentPage, true, this);
+            task.execute((Void) null);
+        }
+
     }
 
 }

@@ -37,7 +37,7 @@ public class DrawingViewInPDF2 extends View {
 	//drawing and canvas paint
 	private Paint drawPaint, canvasPaint;
 	//initial color
-	private int paintColor = 0xFF0000FF;
+	private int paintColor = 0xFF000000;;
 	//canvas
 	private Canvas drawCanvas;
 	//canvas bitmap
@@ -48,8 +48,9 @@ public class DrawingViewInPDF2 extends View {
 	private boolean erase=false;
 	private Bitmap tempCanvasBitmap;
 	private Bitmap transparentBitmap;
-
-
+	private boolean flagDefineBox = false;
+	private DefineBoxIview definedBox;
+	private DefineBoxIview drawBox;
 	private float startX, startY, endX, endY;
 
 	private final String TAG = "DrawingView";
@@ -58,6 +59,13 @@ public class DrawingViewInPDF2 extends View {
 		super(context, attrs);
 		setupDrawing();
 	}
+	public int getPaintColor() {return paintColor;}
+	public DefineBoxIview getDefinedBox() {return definedBox;}
+	public void setDefinedBox(DefineBoxIview definedBox) {this.definedBox =  definedBox;}
+	public DefineBoxIview getDrawBox() {return drawBox;}
+	public void setDrawBox(DefineBoxIview drawBox) {this.drawBox =  drawBox;}
+	public boolean getFlagDefineBox() {return flagDefineBox;}
+	public void setFlagDefineBox(boolean flagDefineBox) {this.flagDefineBox = flagDefineBox;}
 	public int getLeftRec() {
 		return (int)(Math.min(startX, endX));
 	}
@@ -99,8 +107,9 @@ public class DrawingViewInPDF2 extends View {
 		drawPaint.setStrokeJoin(Paint.Join.ROUND);
 		drawPaint.setStrokeCap(Paint.Cap.ROUND);
 		canvasPaint = new Paint(Paint.DITHER_FLAG);
+		setWillNotDraw(false);
 	}
-	public void showPDFContent(String encodedImage)
+	public void showPDFContent(String encodedImage, DefineBoxIview definedBox)
 	{
 		byte[] bytes = Base64.decode(encodedImage.replace("data:image/png;base64,",""), Base64.DEFAULT);
 		Log.i(TAG, "On size Change, Bytes length: "+ bytes.length);
@@ -112,14 +121,25 @@ public class DrawingViewInPDF2 extends View {
 //		transparentBitmap.eraseColor(Color.WHITE);
 //		transparentBitmap.eraseColor(Color.TRANSPARENT);
 		drawCanvas = new Canvas(canvasBitmap);
+		this.definedBox = definedBox;
+		if (definedBox != null) {
+			startX = this.definedBox.getLeft();
+			startY = this.definedBox.getTop();
+			endX = this.definedBox.getLeft() + this.definedBox.getWidth();
+			endY = this.definedBox.getTop() + this.definedBox.getHeight();
 
+			drawPath.addRect(getLeftRec(), getTopRec(), getLeftRec() + getWidth(), getTopRec() + getHeightRec(), Path.Direction.CCW);
+			drawCanvas.drawPath(drawPath, drawPaint);
+			drawPath.reset();
+		}
+//		this.drawBox = definedBox.clone();
 		int width = Constant.width_device;
 		int height = Constant.height_device;
 		scale_x = ((float)canvasBitmap.getWidth())/width;
 		scale_y = ((float)canvasBitmap.getHeight())/height;
 		brushSize = getResources().getInteger(R.integer.small_size) *scale_x;
 		lastBrushSize = brushSize;
-
+		invalidate();
 	}
 
 	//size assigned to view
@@ -183,7 +203,7 @@ public class DrawingViewInPDF2 extends View {
 	//register user touches as drawing action
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
-		if (drawCanvas == null)
+		if (drawCanvas == null || !flagDefineBox)
 			return true;
 		float touchX = event.getX()*scale_x;
 		touchX = (touchX < 0)? 0: touchX;
@@ -213,6 +233,7 @@ public class DrawingViewInPDF2 extends View {
 			endX = touchX;
 			endY = touchY;
 //			drawCanvas.drawRect(startX, startY, endX, endY, drawPaint);
+			drawBox = new DefineBoxIview(getLeftRec(), getTopRec(), getWidth(), getHeightRec(), paintColor, (int)brushSize);
 			drawPath.addRect(startX, startY, endX, endY, Path.Direction.CCW);
 			drawCanvas.drawPath(drawPath, drawPaint);
 //			Toast.makeText(getContext(), "Defined box: Left: " + getLeftRec() + " -Top: " + getTopRec() + " -Width: " + getWidthRec() + " -Height: " + getHeightRec(), Toast.LENGTH_SHORT).show();
@@ -238,6 +259,12 @@ public class DrawingViewInPDF2 extends View {
 			return;
 		invalidate();
 		paintColor = Color.parseColor(newColor);
+		drawPaint.setColor(paintColor);
+	}
+	//update color
+	public void setColor(int newColor){
+		invalidate();
+		paintColor = newColor;
 		drawPaint.setColor(paintColor);
 	}
 
@@ -275,6 +302,11 @@ public class DrawingViewInPDF2 extends View {
 			return;
 		canvasBitmap = tempCanvasBitmap.copy(Bitmap.Config.ARGB_8888, true);
 		drawCanvas = new Canvas(canvasBitmap);
+		if (definedBox != null) {
+			drawPath.addRect(getLeftRec(), getTopRec(), getLeftRec() + getWidth(), getTopRec() + getHeightRec(), Path.Direction.CCW);
+			drawCanvas.drawPath(drawPath, drawPaint);
+		}
+
 
 //		transparentBitmap = Bitmap.createBitmap(tempCanvasBitmap.getWidth(), tempCanvasBitmap.getHeight(), Bitmap.Config.ARGB_8888);
 //		drawTransparentCanvas = new Canvas(transparentBitmap);

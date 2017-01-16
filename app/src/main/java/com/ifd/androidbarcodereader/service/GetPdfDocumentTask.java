@@ -37,6 +37,19 @@ public class GetPdfDocumentTask  extends AsyncTask<Void, Void, Map<String, Objec
     protected Map<String, Object> doInBackground(Void... params) {
         IviewService service = new IviewService();
         Map<String, Object> result = service.getPdfDocument(mUsername, mPassword, mArchive, mFileName, mPage, mGetNumOfPage);
+        Map<String, Object> signature_location_result = service.getSignatureLocation(mUsername, mPassword, mArchive);
+        if (signature_location_result.containsKey("result") && result.containsKey("result")){
+            try {
+                JSONObject data_signature_location = (JSONObject)signature_location_result.get("result");
+                JSONObject result_json = (JSONObject) result.get("result");
+                result_json.put("signature_location", data_signature_location.getJSONObject("data"));
+                result.put("result", result_json);
+            }catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+        }
+
         return result;
     }
 
