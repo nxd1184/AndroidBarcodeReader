@@ -304,4 +304,48 @@ public class IviewService {
         result.put("status_code", responseCode);
         return result;
     }
+    public String getAuthentication(String username, String password){
+        String result = "USER";
+        int responseCode = -1;
+        try {
+            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+            StrictMode.setThreadPolicy(policy);
+            String url = "http://"  + Constant.server_url + "/api/v1/authorization/" + username + "/" + password;
+            String USER_AGENT = "Mozilla/5.0";
+            URL obj = new URL(url);
+            HttpURLConnection conn = (HttpURLConnection) obj.openConnection();
+
+            // default is GET
+            conn.setRequestMethod("GET");
+
+            conn.setUseCaches(false);
+            // act like a browser
+            conn.setRequestProperty("User-Agent", USER_AGENT);
+            conn.setRequestProperty("Accept",
+                    "text/html,application/xhtml+xml,application/xml,application/json;q=0.9,*/*;q=0.8");
+            conn.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
+
+            responseCode = conn.getResponseCode();
+            System.out.println("\nSending 'GET' request to URL : " + url);
+            System.out.println("Response Code : " + responseCode);
+
+            BufferedReader in =
+                    new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            String inputLine;
+            StringBuffer response = new StringBuffer();
+
+            while ((inputLine = in.readLine()) != null) {
+                response.append(inputLine);
+            }
+            in.close();
+            JSONObject resultJson = new JSONObject(response.toString());
+            if (resultJson.has("role")){
+                result = resultJson.getString("role").toString();
+            }
+            Log.i("DEBUG_", result.toString());
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return result;
+    }
 }

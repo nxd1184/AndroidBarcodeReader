@@ -112,6 +112,11 @@ public class OneFragment extends Fragment {
                     String username = sharedPref.getString(getString(R.string.preference_user_name_key),"");
                     String password = sharedPref.getString(getString(R.string.preference_password_key), "");
                     if(iviewService.login(username, password)){
+                        String role = iviewService.getAuthentication(username, password);
+                        SharedPreferences.Editor editor = sharedPref.edit();
+                        editor.putString(getString(R.string.preference_user_role_key), role);
+                        editor.commit();
+
                         Intent listPdfIntent = new Intent(getContext(), ListPdfActivity.class);
                         listPdfIntent.putExtra("barcode", barCodeResult);
                         startActivity(listPdfIntent);

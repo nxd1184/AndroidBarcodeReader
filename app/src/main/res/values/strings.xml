@@ -33,6 +33,7 @@
 
     <string name="preference_key_app">IVIEW_BAR_CODE</string>
     <string name="preference_user_name_key">USER_NAME</string>
+    <string name="preference_user_role_key">ROLE</string>
     <string name="preference_password_key">PASSWORD</string>
     <string name="preference_server_url_key">SERVER_URL</string>
 

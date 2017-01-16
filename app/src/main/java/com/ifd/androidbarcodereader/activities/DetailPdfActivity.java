@@ -59,6 +59,7 @@ public class DetailPdfActivity extends Activity implements View.OnClickListener 
     private String fileName;
     String userName;
     String password;
+    String role;
     TextView txtPage;
     private String base64;
     private String barcode;
@@ -143,6 +144,7 @@ public class DetailPdfActivity extends Activity implements View.OnClickListener 
                 getString(R.string.preference_key_app), Context.MODE_PRIVATE);
         userName = sharedPref.getString(getString(R.string.preference_user_name_key), null);
         password = sharedPref.getString(getString(R.string.preference_password_key), null);
+        role = sharedPref.getString(getString(R.string.preference_user_role_key), "USER");
         if (userName == null || password == null) {
             showHomeScreen();
             Toast.makeText(getApplicationContext(), "Please login before use this feature", Toast.LENGTH_LONG).show();
@@ -203,6 +205,12 @@ public class DetailPdfActivity extends Activity implements View.OnClickListener 
         drawView.setLastBrushSize(smallBrush);
         drawView.setColor(definedBox.getPaintColor());
         drawView.showPDFContent(base64, definedBox);
+        if(definedBox != null)
+        {
+            if (role.equals("USER")){
+                cropBtn.setVisibility(View.GONE);
+            }
+        }
 
     }
     public void showPdfDocument(JSONObject jsonObject) {
