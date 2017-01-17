@@ -96,7 +96,7 @@ public class DrawingViewInPDF2 extends View {
 	private void setupDrawing(){
 
 		//prepare for drawing and setup paint stroke properties
-		brushSize = getResources().getInteger(R.integer.small_size) *scale_x;
+		brushSize = getResources().getInteger(R.integer.small_size);
 		lastBrushSize = brushSize;
 		drawPath = new Path();
 		drawPaint = new Paint();
@@ -127,15 +127,17 @@ public class DrawingViewInPDF2 extends View {
 		int height = Constant.height_device;
 		scale_x = ((float)canvasBitmap.getWidth())/width;
 		scale_y = ((float)canvasBitmap.getHeight())/height;
-		brushSize = getResources().getInteger(R.integer.small_size) ;
+		brushSize = getResources().getInteger(R.integer.small_size);
 		lastBrushSize = brushSize;
 		if (definedBox != null) {
-			startX = this.definedBox.getLeft()/scale_x;
-			startY = this.definedBox.getTop()/scale_y;
-			endX = (this.definedBox.getLeft() + this.definedBox.getWidth())/scale_x;
-			endY = (this.definedBox.getTop() + this.definedBox.getHeight())/scale_y;
-
-			drawPath.addRect(getLeftRec(), getTopRec(), getLeftRec() + getWidthRec(), getTopRec() + getHeightRec(), Path.Direction.CCW);
+			startX = this.definedBox.getLeft();
+			startY = this.definedBox.getTop();
+			endX = (this.definedBox.getLeft() + this.definedBox.getWidth());
+			endY = (this.definedBox.getTop() + this.definedBox.getHeight());
+			paintColor = this.definedBox.getPaintColor();
+			Log.i(TAG, "Add rect111: getLeftRec" + getLeftRec() + " -getTopRec()=" + getTopRec() + " getWidthRec=" + getWidthRec() + "getHeightRec " + getHeightRec() + " -brushSize: "+ brushSize  + " startX: " + startX + " StartY: " + startY + "  EndX: " + endX + " EndY: " + endY);
+			drawPath.addRect(startX, startY, endX, endY, Path.Direction.CCW);
+//			drawPath.addRect(getLeftRec(), getTopRec(), getLeftRec() + getWidthRec(), getTopRec() + getHeightRec(), Path.Direction.CCW);
 			drawCanvas.drawPath(drawPath, drawPaint);
 			drawPath.reset();
 			drawBox = definedBox.clone();
@@ -235,6 +237,7 @@ public class DrawingViewInPDF2 extends View {
 			endY = touchY;
 //			drawCanvas.drawRect(startX, startY, endX, endY, drawPaint);
 			drawBox = new DefineBoxIview(getLeftRec(), getTopRec(), getWidthRec(), getHeightRec(), paintColor, (int)brushSize);
+			Log.i(TAG, "Add rect222: getLeftRec" + getLeftRec() + " -getTopRec()=" + getTopRec() + " getWidthRec=" + getWidthRec() + "getHeightRec " + getHeightRec() + " -brushSize: "+ brushSize  + " startX: " + startX + " StartY: " + startY + "  EndX: " + endX + " EndY: " + endY);
 			drawPath.addRect(startX, startY, endX, endY, Path.Direction.CCW);
 			drawCanvas.drawPath(drawPath, drawPaint);
 //			Toast.makeText(getContext(), "Defined box: Left: " + getLeftRec() + " -Top: " + getTopRec() + " -Width: " + getWidthRec() + " -Height: " + getHeightRec(), Toast.LENGTH_SHORT).show();
@@ -277,8 +280,8 @@ public class DrawingViewInPDF2 extends View {
 				newSize, getResources().getDisplayMetrics());
 
 		Log.i(TAG, "brushSize: " + brushSize + " -lastBrushSize: " + lastBrushSize);
-		brushSize=newSize*scale_x;
-		lastBrushSize=newSize*scale_x;
+		brushSize=newSize;
+		lastBrushSize=newSize;
 		drawPaint.setStrokeWidth(brushSize);
 	}
 

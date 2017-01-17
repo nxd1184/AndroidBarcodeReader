@@ -11,6 +11,12 @@ public class ColorConvertor {
         {
             case "Black":
                 return 0xFF000000;
+            case "Blue":
+                return 0xFF0000FF;
+            case "Purple":
+                return 0xFF990099;
+            case "Red":
+                return 0xFFFF6666;
             default:
                 return 0;
         }
@@ -22,6 +28,12 @@ public class ColorConvertor {
         {
             case 0xFF000000:
                 return "Black";
+            case 0xFF0000FF:
+                return "Blue";
+            case 0xFF990099:
+                return "Purple";
+            case 0xFFFF6666:
+                return "Red";
             default:
                 return "Black";
         }

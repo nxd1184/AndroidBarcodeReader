@@ -432,7 +432,7 @@ public class DetailPdfActivity extends Activity implements View.OnClickListener 
             showPageNum(currentPage);
         }
         else if (view.getId()==R.id.previous_btn){
-            if (currentPage > 0)
+            if (currentPage > 1)
                 currentPage--;
             showPageNum(currentPage);
         }
