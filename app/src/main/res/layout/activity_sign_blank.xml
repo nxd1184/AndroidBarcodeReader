@@ -3,7 +3,7 @@
 xmlns:tools="http://schemas.android.com/tools"
 android:layout_width="match_parent"
 android:layout_height="match_parent"
-android:background="#FFCCCCCC"
+android:background="#ffcccccc"
 android:orientation="vertical"
 tools:context=".activities.SignBlankActivity" >
 
@@ -24,57 +24,62 @@ tools:context=".activities.SignBlankActivity" >
             android:indeterminate="true"
             android:layout_gravity="center" />
     </FrameLayout>
-<!-- Top Buttons -->
+    <!-- Top Buttons -->
 
-<LinearLayout
-    android:layout_width="wrap_content"
-    android:layout_height="50dp"
-    android:layout_gravity="center"
-    android:orientation="horizontal" >
-
-    <ImageButton
-        android:id="@+id/new_btn"
+    <LinearLayout
         android:layout_width="wrap_content"
-        android:layout_height="fill_parent"
-        android:contentDescription="@string/start_new"
-        android:src="@drawable/new_pic" />
+        android:layout_height="50dp"
+        android:layout_gravity="center"
+        android:orientation="horizontal" >
 
-    <!--<ImageButton-->
-        <!--android:id="@+id/draw_btn"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="fill_parent"-->
-        <!--android:contentDescription="@string/brush"-->
-        <!--android:src="@drawable/brush" />-->
+        <ImageButton
+            android:id="@+id/new_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:contentDescription="@string/start_new"
+            android:src="@drawable/new_pic" />
 
-    <!--<ImageButton-->
-        <!--android:id="@+id/erase_btn"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="fill_parent"-->
-        <!--android:contentDescription="@string/erase"-->
-        <!--android:src="@drawable/eraser" />-->
+        <!--<ImageButton-->
+            <!--android:id="@+id/draw_btn"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="fill_parent"-->
+            <!--android:contentDescription="@string/brush"-->
+            <!--android:src="@drawable/brush" />-->
 
-    <ImageButton
-        android:id="@+id/save_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="fill_parent"
-        android:contentDescription="@string/save"
-        android:src="@drawable/save" />
-</LinearLayout>
+        <!--<ImageButton-->
+            <!--android:id="@+id/erase_btn"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="fill_parent"-->
+            <!--android:contentDescription="@string/erase"-->
+            <!--android:src="@drawable/eraser" />-->
 
-<!-- Custom View -->
+        <ImageButton
+            android:id="@+id/save_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:contentDescription="@string/save"
+            android:src="@drawable/save" />
+    </LinearLayout>
 
-<com.ifd.androidbarcodereader.model.DrawingViewSignature
-    android:id="@+id/drawing"
-    android:layout_width="fill_parent"
-    android:layout_height="0dp"
-    android:layout_marginBottom="3dp"
-    android:layout_marginLeft="5dp"
-    android:layout_marginRight="5dp"
-    android:layout_marginTop="3dp"
-    android:layout_weight="1"
-    android:background="#FFFFFFFF" />
+    <!-- Custom View -->
 
-<!-- Color Palette -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <com.ifd.androidbarcodereader.model.DrawingViewSignature
+            android:id="@+id/drawing"
+            android:layout_gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout_marginBottom="20dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_marginTop="3dp"
+            android:background="#ffffff" />
+    </LinearLayout>
+
+
+    <!-- Color Palette -->
 
 <!--<LinearLayout-->
     <!--android:layout_width="wrap_content"-->
