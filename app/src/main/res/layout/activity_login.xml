@@ -36,7 +36,6 @@
 
                 <AutoCompleteTextView
                     android:id="@+id/username"
-                    android:text="anguyen"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="@string/prompt_username"
@@ -52,7 +51,6 @@
 
                 <EditText
                     android:id="@+id/password"
-                    android:text="anguyen"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="@string/prompt_password"

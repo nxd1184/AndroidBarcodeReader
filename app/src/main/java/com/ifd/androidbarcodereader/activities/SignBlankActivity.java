@@ -9,6 +9,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -54,6 +55,7 @@ public class SignBlankActivity extends Activity implements View.OnClickListener 
     FrameLayout progressBarHolder;
     DefineBoxIview definedBox;
     String barcode;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -124,7 +126,7 @@ public class SignBlankActivity extends Activity implements View.OnClickListener 
 
         barcode = (String) extra.get("barcode");
 
-        definedBox = (DefineBoxIview)extra.get("definedBox");
+        definedBox = (DefineBoxIview) extra.get("definedBox");
 
         left = definedBox.getLeft();
         top = definedBox.getTop();
@@ -285,24 +287,25 @@ public class SignBlankActivity extends Activity implements View.OnClickListener 
                 String filename = UUID.randomUUID().toString() + ".png";
                 FileOutputStream out = null;
                 try {
-                    File sd = Environment.getExternalStorageDirectory();
-                    File dest = new File(sd.getAbsoluteFile(), filename);
-                    out = new FileOutputStream(dest);
-                    saveBitMap.compress(Bitmap.CompressFormat.PNG, 100, out);
+//                    File sd = Environment.getExternalStorageDirectory();
+//                    File dest = new File(sd.getAbsoluteFile(), filename);
+//                    out = new FileOutputStream(dest);
+//                    saveBitMap.compress(Bitmap.CompressFormat.PNG, 100, out);
 
 
-
+                    BitmapDrawable drawable = new BitmapDrawable(getResources(), saveBitMap);
+                    drawable.setAlpha(100);
                     ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
                     saveBitMap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
                     byte[] byteArray = byteArrayOutputStream.toByteArray();
                     base64 = "data:image/png;base64," + Base64.encodeToString(byteArray, Base64.DEFAULT);
 
                     //Store png file to base64
-                    File dest2 = new File(sd.getAbsoluteFile(), filename + ".txt");
-                    FileOutputStream out2 = new FileOutputStream(dest2);
-                    out2.write(base64.getBytes());
-                    out2.close();
-                    SaveSignatureTask task = new SaveSignatureTask(context,userName,password,archiveName, fileName, pageNum, base64, left, top, width, heigh);
+//                    File dest2 = new File(sd.getAbsoluteFile(), filename + ".txt");
+//                    FileOutputStream out2 = new FileOutputStream(dest2);
+//                    out2.write(base64.getBytes());
+//                    out2.close();
+                    SaveSignatureTask task = new SaveSignatureTask(context, userName, password, archiveName, fileName, pageNum, base64, left, top, width, heigh);
                     task.execute((Void) null);
                     showProgress(true);
                 } catch (Exception e) {
@@ -329,6 +332,7 @@ public class SignBlankActivity extends Activity implements View.OnClickListener 
         });
         saveDialog.show();
     }
+
     private static Bitmap eraseBG(Bitmap src, int color) {
         int width = src.getWidth();
         int height = src.getHeight();
@@ -348,6 +352,7 @@ public class SignBlankActivity extends Activity implements View.OnClickListener 
 
         return b;
     }
+
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
     private void showProgress(final boolean show) {
         // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
@@ -365,13 +370,12 @@ public class SignBlankActivity extends Activity implements View.OnClickListener 
 //				}
 //			});
 
-            if(show) {
+            if (show) {
                 inAnimation = new AlphaAnimation(0f, 1f);
                 inAnimation.setDuration(200);
                 progressBarHolder.setAnimation(inAnimation);
                 progressBarHolder.setVisibility(View.VISIBLE);
-            }
-            else {
+            } else {
                 outAnimation = new AlphaAnimation(1f, 0f);
                 outAnimation.setDuration(200);
                 progressBarHolder.setAnimation(outAnimation);
@@ -384,8 +388,8 @@ public class SignBlankActivity extends Activity implements View.OnClickListener 
             progressBarHolder.setVisibility(show ? View.VISIBLE : View.GONE);
         }
     }
-    public void saveSignatureComplete(Map<String, Object> mapResult)
-    {
+
+    public void saveSignatureComplete(Map<String, Object> mapResult) {
         if (!mapResult.containsKey("result")) {
             Toast.makeText(context.getApplicationContext(), "Can't save signature into PDF document, please try again. Error code: " + mapResult.get("status_code"), Toast.LENGTH_LONG).show();
         } else {
