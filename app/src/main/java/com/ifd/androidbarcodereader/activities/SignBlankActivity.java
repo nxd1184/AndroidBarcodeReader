@@ -391,15 +391,23 @@ public class SignBlankActivity extends Activity implements View.OnClickListener 
         } else {
             Toast.makeText(getApplicationContext(),
                     "Signature saved to PDF Document! ", Toast.LENGTH_SHORT).show();
+//            Intent intent = new Intent(context, DetailPdfActivity.class);
+//            intent.putExtra("archiveName", archiveName);
+//            intent.putExtra("fileName", fileName);
+//            intent.putExtra("base64", base64);
+//            intent.putExtra("pageNum", pageNum);
+//            intent.putExtra("totalPage", totalPage);
+//            intent.putExtra("definedBox", definedBox);
+//            intent.putExtra("barcode", barcode);
+//            context.startActivity(intent);
+
             Intent intent = new Intent(context, DetailPdfActivity.class);
             intent.putExtra("archiveName", archiveName);
             intent.putExtra("fileName", fileName);
-            intent.putExtra("base64", base64);
-            intent.putExtra("pageNum", pageNum);
-            intent.putExtra("totalPage", totalPage);
-            intent.putExtra("definedBox", definedBox);
             intent.putExtra("barcode", barcode);
+            intent.putExtra("pageNum", pageNum);
             context.startActivity(intent);
+
         }
         showProgress(false);
     }

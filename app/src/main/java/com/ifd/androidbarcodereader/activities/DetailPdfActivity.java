@@ -161,9 +161,12 @@ public class DetailPdfActivity extends Activity implements View.OnClickListener 
             updatePageNumber();
             return;
         }
-
+        currentPage = 1;
+        if(extra.containsKey("pageNum")){
+            currentPage = (int) extra.get("pageNum");
+        }
         showProgress(true);
-        GetPdfDocumentTask task = new GetPdfDocumentTask(userName, password, archiveName, fileName, 1, true, this);
+        GetPdfDocumentTask task = new GetPdfDocumentTask(userName, password, archiveName, fileName, currentPage, true, this);
         task.execute((Void) null);
 
 //		IviewService service = new IviewService();
