@@ -94,7 +94,8 @@ public class OneFragment extends Fragment {
         mSearchInIviewButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                barCodeResult = "1234567";
+                barCodeResult = "7654321";
+//                barCodeResult = "1234567";
                 if (Constant.server_url == null || Constant.server_url.equals("")) {
                     Toast.makeText(getContext(), "Please config server iView url before use this feature", Toast.LENGTH_SHORT).show();
                     return;
